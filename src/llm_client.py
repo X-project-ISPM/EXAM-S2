@@ -158,3 +158,32 @@ def llm_call(
             f"Réponse brute : {(reponse.text or '')[:200]}"
         )
     return resultat
+
+
+def llm_call_with_tools(
+    messages: list,
+    prompt_systeme: str,
+    tools: list,
+    response_schema: type[BaseModel] | None = None,
+):
+    """Appel LLM avec function calling (AGT-5).
+
+    `messages` est l'historique au format Gemini (liste de `types.Content`,
+    incluant les `FunctionCall`/`FunctionResponse` des itérations précédentes).
+    La reprise sur quota et le lissage de débit sont les mêmes que
+    `llm_call` : on passe par le même point d'appel.
+
+    Quand `response_schema` est fourni, le modèle est contraint en JSON : si la
+    réponse est une réponse finale (pas d'appel d'outil), `reponse.parsed`
+    contient directement une instance Pydantic validée.
+    """
+    parametres = types.GenerateContentConfig(
+        system_instruction=prompt_systeme,
+        temperature=config.llm_temperature,
+        max_output_tokens=config.llm_max_output_tokens,
+        tools=tools,
+    )
+    if response_schema is not None:
+        parametres.response_mime_type = "application/json"
+        parametres.response_schema = response_schema
+    return _appeler_avec_reprise(messages, parametres)
