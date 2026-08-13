@@ -8,6 +8,7 @@ consomme, et `est_sensible()` décide de la validation humaine.
 from datetime import datetime
 
 import pytest
+
 from src.models import (
     ArticleKB,
     BaseDeDonnees,

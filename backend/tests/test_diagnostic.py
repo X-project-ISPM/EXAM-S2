@@ -6,6 +6,7 @@ quand le modèle varie.
 """
 
 import pytest
+
 from src.diagnostic import (
     CHAMPS_REQUIS_PAR_CATEGORIE,
     NB_QUESTIONS_MAX,

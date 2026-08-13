@@ -1,0 +1,14 @@
+[
+  {"id": "PC-001", "type": "poste", "utilisateur_id": "U-001", "statut": "actif"},
+  {"id": "PC-002", "type": "poste", "utilisateur_id": "U-002", "statut": "actif"},
+  {"id": "PC-003", "type": "poste", "utilisateur_id": "U-003", "statut": "en_panne"},
+  {"id": "PC-004", "type": "poste", "utilisateur_id": "U-004", "statut": "actif"},
+  {"id": "PC-005", "type": "poste", "utilisateur_id": "U-005", "statut": "maintenance"},
+  {"id": "PC-006", "type": "poste", "utilisateur_id": "U-006", "statut": "actif"},
+  {"id": "PORT-007", "type": "poste", "utilisateur_id": "U-007", "statut": "actif"},
+  {"id": "IMP-001", "type": "imprimante", "utilisateur_id": null, "statut": "actif"},
+  {"id": "IMP-002", "type": "imprimante", "utilisateur_id": null, "statut": "en_panne"},
+  {"id": "SRV-PROD-01", "type": "serveur", "utilisateur_id": null, "statut": "en_panne"},
+  {"id": "SRV-MAIL-01", "type": "serveur", "utilisateur_id": null, "statut": "actif"},
+  {"id": "SRV-FICHIERS-01", "type": "serveur", "utilisateur_id": null, "statut": "actif"}
+]

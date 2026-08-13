@@ -8,6 +8,7 @@ la suite de tests.
 from types import SimpleNamespace
 
 import pytest
+
 from src.config import config
 from src.observability import (
     ChronoLatence,

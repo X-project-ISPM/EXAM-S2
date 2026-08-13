@@ -6,6 +6,7 @@ ce sont eux qui protègent contre la « génération d'une procédure inexistant
 """
 
 import pytest
+
 from src.rag import ReponseRAG, chunker, generer_reponse_rag
 
 # --- Découpage (RAG-2) ------------------------------------------------------
@@ -139,9 +140,8 @@ def test_toutes_les_sources_inventees_laisse_une_reponse_sans_source(monkeypatch
 @pytest.fixture(scope="module")
 def index(tmp_path_factory):
     """Index isolé, reconstruit dans un dossier temporaire."""
-    from src.config import config
-
     from src import rag
+    from src.config import config
 
     config.dossier_chroma = tmp_path_factory.mktemp("chroma")
     rag._collection.cache_clear()

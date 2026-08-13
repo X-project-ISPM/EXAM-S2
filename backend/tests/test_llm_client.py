@@ -9,6 +9,7 @@ la clé, puis avant la démo.
 from types import SimpleNamespace
 
 import pytest
+
 from src.config import config
 from src.llm_client import LLMError, llm_call, llm_call_with_tools, set_log_llm_call
 from src.schemas import Classification
