@@ -128,7 +128,29 @@ OUTILS: list[dict] = [
             },
             "champs": {
                 "type": "OBJECT",
-                "description": "Champs à modifier (ex. statut, priorite, resolution)",
+                "description": "Champs à modifier parmi statut, priorite, resolution, equipe.",
+                # Un OBJECT sans "properties" imbriquées est accepté par l'API
+                # mais le modèle ne sait alors pas quoi y mettre : testé en
+                # réel, il renvoie systématiquement `champs: {}`. Chaque champ
+                # modifiable doit donc être déclaré explicitement.
+                "properties": {
+                    "statut": {
+                        "type": "STRING",
+                        "description": "Nouveau statut, ex. 'en_cours', 'resolu', 'ferme'",
+                    },
+                    "priorite": {
+                        "type": "STRING",
+                        "description": "Nouvelle priorité : basse, moyenne, haute ou critique",
+                    },
+                    "resolution": {
+                        "type": "STRING",
+                        "description": "Description de la résolution appliquée",
+                    },
+                    "equipe": {
+                        "type": "STRING",
+                        "description": "Nouvelle équipe assignée",
+                    },
+                },
             },
         },
     },
@@ -196,6 +218,27 @@ def est_sensible(nom: str) -> bool:
 # --- Déclaration pour le function calling Gemini -----------------------------
 
 
+def _schema_parametre(spec: dict) -> types.Schema:
+    """Construit le `types.Schema` d'un paramètre, y compris pour un OBJECT.
+
+    Un OBJECT sans "properties" imbriquées est accepté par l'API mais laisse
+    le modèle deviner quoi y mettre — testé en réel sur `mettre_a_jour_ticket`,
+    il renvoie alors systématiquement un dict vide. Toute entrée `OBJECT` de
+    la spec doit donc fournir ses propres "properties".
+    """
+    if spec["type"] == "OBJECT" and "properties" in spec:
+        sous_proprietes = {
+            nom: types.Schema(type=sous_spec["type"], description=sous_spec["description"])
+            for nom, sous_spec in spec["properties"].items()
+        }
+        return types.Schema(
+            type="OBJECT",
+            description=spec["description"],
+            properties=sous_proprietes,
+        )
+    return types.Schema(type=spec["type"], description=spec["description"])
+
+
 def declarer_outils() -> list[types.Tool]:
     """Convertit la spécification en déclarations exploitables par l'API Gemini.
 
@@ -206,11 +249,7 @@ def declarer_outils() -> list[types.Tool]:
     outils_declares = []
     for outil in OUTILS:
         proprietes = {
-            nom: types.Schema(
-                type=spec["type"],
-                description=spec["description"],
-            )
-            for nom, spec in outil["parameters"].items()
+            nom: _schema_parametre(spec) for nom, spec in outil["parameters"].items()
         }
         outils_declares.append(
             types.FunctionDeclaration(

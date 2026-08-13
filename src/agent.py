@@ -208,6 +208,15 @@ def run_agent(
         if not appels:
             return _valider_reponse_finale(reponse, outils_utilises)
 
+        # Renvoyer le Content du modèle tel quel (pas un Part reconstruit à la
+        # main) : Gemini attache un `thought_signature` à chaque function_call
+        # et exige qu'il soit réécho au tour suivant. Le reconstruire en
+        # ne gardant que `function_call=appel` le perdait, ce qui faisait
+        # échouer tout appel après le premier avec `400 INVALID_ARGUMENT —
+        # thought_signature manquant` (confirmé en réel, cf. test_agent_reel_bout_en_bout).
+        historique.append(reponse.candidates[0].content)
+
+        reponses_fonctions = []
         for appel in appels:
             nom = appel.name
             params = dict(appel.args or {})
@@ -223,25 +232,14 @@ def run_agent(
                     outils_utilises,
                 )
 
-            historique.extend(
-                [
-                    types.Content(
-                        role="model",
-                        parts=[types.Part(function_call=appel)],
-                    ),
-                    types.Content(
-                        role="user",
-                        parts=[
-                            types.Part(
-                                function_response=types.FunctionResponse(
-                                    name=nom,
-                                    response=resultat,
-                                )
-                            )
-                        ],
-                    ),
-                ]
+            reponses_fonctions.append(
+                types.Part(function_response=types.FunctionResponse(name=nom, response=resultat))
             )
+
+        # Un seul Content côté "user" qui regroupe toutes les réponses de ce
+        # tour : plusieurs appels dans la même réponse modèle attendent leurs
+        # FunctionResponse dans un unique message, pas un par un.
+        historique.append(types.Content(role="user", parts=reponses_fonctions))
 
     # Limite d'itérations atteinte sans conclusion (contrôle du nombre
     # d'actions, §5.2) : ne jamais renvoyer une erreur nue.
