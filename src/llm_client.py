@@ -33,6 +33,17 @@ class QuotaDepasseError(LLMError):
     """Quota Gemini épuisé malgré les tentatives de réémission."""
 
 
+class SchemaNonConforme(LLMError):
+    """Le modèle a répondu, mais sans respecter le `response_schema` demandé.
+
+    Distinct de `QuotaDepasseError` et des pannes réseau : celles-ci ne se
+    résolvent pas en réessayant le même prompt, alors qu'une non-conformité
+    de schéma peut se corriger par une régénération (OUT-2,
+    `sortie.generer_avec_retry`, qui n'attrape que ce cas précis — pas les
+    erreurs réseau, qui doivent remonter immédiatement).
+    """
+
+
 def _delai_suggere(message: str) -> float | None:
     """Extrait le délai que l'API elle-même recommande d'attendre.
 
@@ -153,7 +164,7 @@ def llm_call(
 
     resultat = reponse.parsed
     if resultat is None:
-        raise LLMError(
+        raise SchemaNonConforme(
             f"Le modèle n'a pas produit de JSON conforme à {response_schema.__name__}. "
             f"Réponse brute : {(reponse.text or '')[:200]}"
         )
