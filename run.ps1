@@ -21,6 +21,11 @@ $api = Start-Process -FilePath $python -ArgumentList "-m","uvicorn","src.api:app
     -WorkingDirectory (Join-Path $racine "backend") -PassThru -NoNewWindow
 try {
     Start-Sleep -Seconds 2
+    # Sans ceci, frontend/app.py retombe sur son défaut (l'instance déployée
+    # sur Render) au lieu de l'API locale démarrée ci-dessus — confirmé en
+    # réel : l'API locale ne recevait aucune requête tant que cette variable
+    # n'était pas positionnée.
+    $env:API_URL = "http://localhost:8000"
     & $python -m streamlit run (Join-Path $racine "frontend\app.py") --server.port 8501
 }
 finally {
