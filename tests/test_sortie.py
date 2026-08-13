@@ -7,6 +7,7 @@ vérifie la mécanique (nombre d'essais, transmission de l'erreur au 2e essai,
 
 import pytest
 
+from src.llm_client import LLMError, QuotaDepasseError, SchemaNonConforme
 from src.schemas import TicketDecision
 from src.sortie import generer_avec_retry, reponse_erreur_controlee
 
@@ -59,6 +60,50 @@ def test_echec_puis_succes_au_second_essai():
     assert len(appels) == 2
     assert appels[1] is not None
     assert "peut_etre" in str(appels[1])
+
+
+def test_schema_non_conforme_de_llm_call_declenche_bien_le_retry():
+    """`prompt_fn` branché directement sur `llm_call(..., response_schema=...)`
+    (l'usage réel prévu par ORCH-1) ne lève jamais `ValidationError` en cas de
+    non-conformité : il lève `SchemaNonConforme`. Avant ce fix, cette
+    exception traversait `generer_avec_retry` sans déclencher de régénération —
+    le retry n'existait alors que sur le papier pour cet usage."""
+    appels = []
+
+    def prompt_fn(erreur_precedente=None):
+        appels.append(erreur_precedente)
+        if erreur_precedente is None:
+            raise SchemaNonConforme("le modèle n'a pas produit de JSON conforme")
+        return _brut_valide()
+
+    resultat = generer_avec_retry(prompt_fn, TicketDecision)
+    assert isinstance(resultat, TicketDecision)
+    assert len(appels) == 2
+    assert "JSON conforme" in str(appels[1])
+
+
+def test_max_essais_zero_ne_retombe_pas_sur_la_valeur_par_defaut():
+    """`0` est falsy en Python : `max_essais or config...` retombait
+    silencieusement sur la valeur par défaut au lieu de zéro tentative."""
+    with pytest.raises(RuntimeError, match="0 essais"):
+        generer_avec_retry(
+            lambda erreur_precedente=None: _brut_valide(), TicketDecision, max_essais=0
+        )
+
+
+def test_erreur_reseau_ou_quota_remonte_immediatement_pas_de_retry():
+    """`LLMError`/`QuotaDepasseError` génériques (réseau, quota) ne sont pas
+    des problèmes de schéma : ils doivent continuer à remonter tout de suite,
+    sans consommer un essai de régénération inutile."""
+    appels = []
+
+    def prompt_fn(erreur_precedente=None):
+        appels.append(erreur_precedente)
+        raise QuotaDepasseError("quota Gemini dépassé")
+
+    with pytest.raises(LLMError):
+        generer_avec_retry(prompt_fn, TicketDecision)
+    assert len(appels) == 1
 
 
 def test_echec_persistant_leve_une_erreur():
