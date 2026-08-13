@@ -198,7 +198,10 @@ OUTILS: list[dict] = [
 # --- Accès à la spécification ------------------------------------------------
 
 _NOMS_OUTILS = {o["name"] for o in OUTILS}
-_OUTILS_SENSIBLES = {o["name"] for o in OUTILS if o["sensible"]}
+# Public (SEC-2) : `guardrails.py` le réexporte pour garder une porte d'entrée
+# unique sur les garde-fous, mais la liste est dérivée de la spéc — pas
+# maintenue à deux endroits.
+OUTILS_SENSIBLES = {o["name"] for o in OUTILS if o["sensible"]}
 
 
 def spec_outil(nom: str) -> dict | None:
@@ -212,7 +215,7 @@ def est_sensible(nom: str) -> bool:
     Règle déterministe côté code : même un LLM manipulé ne peut pas la
     contourner (§9 de l'architecture, couche 3).
     """
-    return nom in _OUTILS_SENSIBLES
+    return nom in OUTILS_SENSIBLES
 
 
 # --- Déclaration pour le function calling Gemini -----------------------------

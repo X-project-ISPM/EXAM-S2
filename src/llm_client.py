@@ -16,7 +16,7 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel
 
-from config import config
+from src.config import config
 
 logger = logging.getLogger(__name__)
 

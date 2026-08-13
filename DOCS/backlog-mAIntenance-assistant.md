@@ -67,10 +67,40 @@ Décisions prises pendant l'implémentation :
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| DIAG-1 | Écrire le prompt d'extraction d'informations (`DiagnosticInfo`) | 25 min | SETUP-4 |
-| DIAG-2 | Implémenter `extraire_diagnostic()` | 20 min | DIAG-1 |
-| DIAG-3 | Implémenter `generer_questions()` à partir de `informations_manquantes` | 20 min | DIAG-2 |
-| DIAG-4 | Tester le scénario 3 (demande incomplète) de bout en bout | 20 min | DIAG-3 |
+| ~~DIAG-1~~ ✅ | Prompt d'extraction, avec interdiction explicite d'inventer ou de recopier | 25 min | SETUP-4 |
+| ~~DIAG-2~~ ✅ | `extraire_diagnostic(description, categorie)` — extraction LLM + manques calculés en code | 20 min | DIAG-1 |
+| ~~DIAG-3~~ ✅ | `generer_questions()` — tri par priorité, plafond à 2, reformulation par catégorie | 20 min | DIAG-2 |
+| ~~DIAG-4~~ ✅ | Scénario 3 vérifié sur cas réels + 4 tests réseau | 20 min | DIAG-3 |
+
+**Revue de code — 5 défauts trouvés et corrigés :**
+1. *Le module ne s'importait pas du tout* : `from schemas import …` au lieu de
+   `from src.schemas import …`. `diagnostic.py` était du code mort, inutilisable par
+   l'orchestrateur.
+2. *Même régression dans `llm_client.py`* (`from config import config`) — celle-là cassait
+   **tout le projet**, ce module étant importé par classifier, rag, agent et sortie. Cause
+   racine commune : des fichiers exécutés directement depuis `src/`, où les imports nus
+   fonctionnent par accident.
+3. *Règle métier confiée au LLM* : le prompt demandait au modèle de juger quels champs
+   étaient « nécessaires pour ce type de problème ». Les questions posées à l'utilisateur
+   variaient donc d'un appel à l'autre pour un même ticket. La table
+   `CHAMPS_REQUIS_PAR_CATEGORIE` tranche désormais en code — et la catégorie est déjà
+   connue, puisque la classification tourne avant.
+4. *Fichier de test dans `src/`*, exécutant de vrais appels LLM au simple import — donc
+   jamais collecté par pytest, et dangereux pour quiconque importait le paquet. Déplacé en
+   `tests/test_diagnostic.py`, réécrit en tests pytest (27 hors-ligne + 4 réseau).
+5. *Champs remplis par supposition* : rien n'interdisait au modèle d'inventer. Un champ
+   inventé passe pour renseigné, la question n'est jamais posée, et le diagnostic se fait
+   sur une base fausse.
+
+**Défaut trouvé en exécution réelle** : sur « Ça ne marche plus », le modèle recopiait le
+ticket mot pour mot dans `symptomes`. Le champ paraissait renseigné, aucune question
+n'était posée — **le scénario 3 obligatoire ne se déclenchait pas**. Corrigé par une
+vérification déterministe (`_est_un_echo`) qui écarte tout champ ne faisant que redire le
+ticket, accents et ponctuation repliés.
+
+**Conservé du travail initial** : la priorisation des questions par `PRIORITE_CHAMPS`,
+meilleure que le `[:2]` naïf du document d'architecture — l'ordre des champs manquants
+suit la déclaration du schéma, pas leur utilité.
 
 ## 📚 RAG
 
@@ -146,12 +176,50 @@ plafond de fragments par source pour qu'un article long ne monopolise pas le top
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| SEC-1 **[MAJ]** | Écrire `MOTS_CLES_INJECTION` en regex + `PATTERN_ROLE_SYSTEME` (le littéral `"system:"` seul donnait des faux positifs — ne détecter qu'en début de ligne) et `check_injection()` | 25 min | — |
-| SEC-2 | Définir `OUTILS_SENSIBLES` et `est_sensible()` | 15 min | AGT-1 |
-| SEC-3 | Implémenter `escalade_immediate()` pour les tickets malveillants détectés (construit un `TicketDecision` avec `resume`) | 20 min | SEC-1, OUT-1 |
-| SEC-4 **[MAJ — n'est plus optionnel]** | Implémenter `verifier_intention_malveillante_llm()` et la fusionner dans `check_injection()` : c'est cette couche qui attrape les reformulations que les mots-clés ratent ("ignore ce qui précède"). Directement liée à l'axe sécurité noté (10 %) et au scénario 4 obligatoire — traiter en priorité, pas en fin de journée. | 30 min | SEC-1, SETUP-4 |
-| SEC-5 | Masquer les données sensibles (mots de passe, identifiants) avant écriture dans les logs — couvre désormais aussi `logs/llm_calls.jsonl` | 15 min | OBS-1, OBS-6 |
-| SEC-6 **[MAJ]** | Tester le scénario 4 (demande sensible/malveillante) **avec une formulation qui contourne les mots-clés**, pour vérifier que la couche LLM (SEC-4) rattrape ce que SEC-1 rate | 25 min | SEC-3, SEC-4, AGT-6 |
+| ~~SEC-1~~ ✅ | `MOTS_CLES_INJECTION` (6 motifs) + `PATTERN_ROLE_SYSTEME` en début de ligne + `check_injection()` | 25 min | — |
+| ~~SEC-2~~ ✅ | `OUTILS_SENSIBLES` et `est_sensible()` — dans `tools.py`, réexportés par `guardrails.py` | 15 min | AGT-1 |
+| ~~SEC-3~~ ✅ | `escalade_immediate()` — `TicketDecision` valide, aucun outil appelé, aucune procédure générée | 20 min | SEC-1, OUT-1 |
+| ~~SEC-4~~ ✅ | `verifier_intention_malveillante_llm()` fusionnée dans `check_injection()` (OU logique) | 30 min | SEC-1, SETUP-4 |
+| SEC-5 ⏳ | `masquer_donnees_sensibles()` / `masquer_objet()` écrits et testés dans `guardrails.py` ; **reste à brancher** dans OBS-1 et OBS-6, qui n'existent pas encore | 15 min | OBS-1, OBS-6 |
+| ~~SEC-6~~ ✅ | Scénario 4 testé avec 3 formulations qui contournent les mots-clés + 2 tickets légitimes en contrôle inverse (`pytest -m reseau`) | 25 min | SEC-3, SEC-4, AGT-6 |
+
+**Résultats mesurés** (`pytest tests/test_guardrails.py`, 38 tests hors réseau + 5 réels
+sur `gemini-3.5-flash-lite`) : les 3 attaques reformulées du scénario 4 passent la couche
+mots-clés et sont **toutes rattrapées par la couche LLM** ; les 2 tickets légitimes qui
+parlent de sécurité (phishing, compte verrouillé) ne sont **pas** signalés.
+
+**Répartition du travail entre les deux couches** — la couche 1 est réglée pour la
+**précision**, la couche 2 porte le **rappel**. Trois motifs candidats ont été retirés
+après avoir produit des faux positifs sur des tickets de support plausibles :
+`sans restriction` (« un accès sans restriction au dossier partagé compta »),
+`mode développeur` (« j'ai activé le mode développeur de Chrome »), `jailbreak`
+(« mon téléphone a été jailbreaké » — vrai ticket de cybersécurité). Ces cas sont
+verrouillés par un test de non-régression. Même logique pour `PATTERN_ROLE_SYSTEME`,
+limité à l'anglais : `Système : Windows 11` est un en-tête de ticket ordinaire.
+
+**Trois décisions prises pendant l'implémentation :**
+1. *La couche 2 est court-circuitée quand la couche 1 a détecté.* Le verdict étant un OU
+   logique, l'appel LLM ne pourrait pas changer le résultat — il coûterait une requête
+   sur les ~15/minute du Free Tier sans rien apporter. Vérifié par test (zéro appel).
+2. *Échec LLM = dégradation sur la couche 1, pas blocage du ticket.* Bloquer serait
+   illusoire : si le modèle est injoignable, la classification et le RAG le sont aussi et
+   ORCH-3 dégrade de toute façon. Le fait que la vérification n'ait pas eu lieu reste
+   visible dans le champ `verification_llm` de la trace.
+3. *Le masquage ne s'applique qu'au couple étiquette + valeur.* Un `if "mot de passe" in
+   texte` aurait masqué « j'ai oublié mon mot de passe » — un log exact mais devenu
+   inexploitable pour le support. Une liste de suites non secrètes (`expiré`, `refusé`,
+   `oublié`...) protège les cas où la valeur n'en est pas une.
+
+**Écart assumé avec le §9 de l'architecture** : `escalade_immediate()` construit
+`categorie="cybersecurite"` / `equipe="securite_si"` là où le pseudo-code écrit
+`categorie="autre"` / `equipe="securite"`. `"securite"` n'existe pas dans le vocabulaire
+`Equipe` de `schemas.py` (la décision aurait été rejetée par Pydantic), et `"autre"`
+route vers le support de niveau 1 — soit la mauvaise équipe pour une tentative de
+manipulation.
+
+**Reste à faire (hors périmètre du bloc)** : ORCH-1 doit appeler `check_injection()` puis
+`escalade_immediate()` **avant** la classification (§2 de l'architecture) ; OBS-1/OBS-6
+doivent passer leurs entrées par `masquer_objet()` avant écriture.
 
 ## 📊 Observabilité
 
