@@ -24,4 +24,8 @@ API_PID=$!
 trap 'kill $API_PID 2>/dev/null' EXIT
 
 sleep 2
-"$PYTHON" -m streamlit run "$RACINE/frontend/app.py" --server.port 8501
+# Sans ceci, frontend/app.py retombe sur son défaut (l'instance déployée sur
+# Render) au lieu de l'API locale démarrée ci-dessus — confirmé en réel :
+# l'API locale ne recevait aucune requête tant que cette variable n'était
+# pas positionnée.
+API_URL="http://localhost:8000" "$PYTHON" -m streamlit run "$RACINE/frontend/app.py" --server.port 8501
