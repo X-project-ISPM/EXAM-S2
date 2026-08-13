@@ -202,6 +202,8 @@ def run_agent(
             PROMPT_SYSTEME_AGENT,
             declarer_outils(),
             response_schema=TicketDecision,
+            etape="agent",
+            trace_id=trace_id,
         )
 
         appels = _extraire_appels(reponse)

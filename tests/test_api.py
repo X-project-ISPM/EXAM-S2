@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 
 from src import agent, orchestrator
 from src.api import app
+from src.config import config
 from src.models import BaseDeDonnees
 from src.schemas import Classification, DiagnosticInfo, TicketDecision
 from src.tools import creer_ticket, initialiser_donnees
@@ -74,10 +75,19 @@ def pipeline(monkeypatch):
     )
 
 
+@pytest.fixture(autouse=True)
+def _logs_isoles(tmp_path, monkeypatch):
+    """Le `lifespan` branche pour de vrai les hooks OBS-1/2/6 (`set_log_appel`,
+    `set_log_llm_call`, `orchestrator.set_log_trace`) : sans cette isolation,
+    chaque test ici écrirait dans le vrai `logs/` du dépôt."""
+    monkeypatch.setattr(config, "dossier_logs", tmp_path)
+
+
 @pytest.fixture
 def client():
     # Contexte requis pour déclencher le `lifespan` (chargement des données,
-    # `initialiser_donnees`) : sans lui, `app.state.donnees` n'existe jamais.
+    # `initialiser_donnees`, branchement des hooks d'observabilité) : sans
+    # lui, `app.state.donnees` n'existe jamais et rien n'est loggé.
     with TestClient(app) as c:
         yield c
 
@@ -136,6 +146,32 @@ def test_confiance_de_la_classification_traverse_lapi(client):
     corps = client.post("/tickets/traiter", json={"description": "Poste en panne"}).json()
     assert corps["decision"]["categorie"] == "materiel"
     assert corps["decision"]["equipe"] == "support_materiel"
+
+
+# --- GET /observabilite/traces (OBS-2, OBS-4) --------------------------------
+
+
+def test_observabilite_traces_vide_sans_ticket_traite(client):
+    assert client.get("/observabilite/traces").json() == []
+
+
+def test_traiter_ecrit_une_trace_lisible_par_observabilite(client):
+    """OBS-2 : le hook `orchestrator.set_log_trace()` est bien branché par le
+    `lifespan` — même le pipeline réel (pas juste le stub d'avant ORCH-1) doit
+    produire une trace exploitable pour l'onglet Observabilité (FE-6)."""
+    trace_id = client.post("/tickets/traiter", json={"description": "Test OBS"}).json()["trace_id"]
+
+    traces = client.get("/observabilite/traces").json()
+    trace = next(t for t in traces if t["trace_id"] == trace_id)
+    assert trace["categorie_classifiee"] == "materiel"
+    assert trace["decision"]["categorie"] == "materiel"
+    assert trace["latence_ms"] >= 0
+
+
+def test_observabilite_traces_respecte_la_limite(client):
+    for i in range(3):
+        client.post("/tickets/traiter", json={"description": f"ticket {i}"})
+    assert len(client.get("/observabilite/traces", params={"limite": 2}).json()) == 2
 
 
 # --- POST /tickets/valider (ORCH-2) ------------------------------------------

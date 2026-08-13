@@ -19,6 +19,7 @@ from pydantic import BaseModel, ValidationError
 
 from src.config import config
 from src.guardrails import masquer_donnees_sensibles
+from src.llm_client import SchemaNonConforme
 from src.schemas import TicketDecision
 
 # `prompt_fn` peut retourner un objet déjà validé par `llm_call(...,
