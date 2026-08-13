@@ -4,7 +4,7 @@ import streamlit as st
 
 st.set_page_config(page_title="mAIntenance & Assistance", layout="wide")
 
-API = os.getenv("API_URL", "http://localhost:8000")
+API = os.getenv("API_URL", "https://exam-s2.onrender.com")
 
 with st.sidebar:
     st.subheader("Scénarios de démo")
