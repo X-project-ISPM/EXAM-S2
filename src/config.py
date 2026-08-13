@@ -33,6 +33,12 @@ class Config(BaseSettings):
     # 0 désactive le lissage.
     llm_requetes_par_minute: int = 14  # marge sous la limite Free Tier de 15
 
+    # --- Sortie structurée (OUT-2) ---
+    # Nombre de tentatives de génération conforme au schéma avant d'abandonner :
+    # le 2e essai inclut le message d'erreur de validation du 1er (§7 de
+    # l'architecture). Chaque essai consomme un appel LLM, d'où 2 max.
+    llm_max_essais_validation: int = 2
+
     # --- RAG ---
     # ATTENTION : ChromaDB utilise L2 au carré par défaut, pas le cosinus. La
     # collection est créée explicitement en espace cosinus (voir rag.py) —
