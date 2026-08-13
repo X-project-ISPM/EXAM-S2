@@ -1,0 +1,151 @@
+[
+  {
+    "id": "EV-01",
+    "description": "Bonjour, j'ai oublié mon mot de passe et je n'arrive plus à me connecter ce matin.",
+    "categorie_attendue": "comptes_authentification",
+    "priorite_attendue": "haute",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-02",
+    "description": "Impossible d'accéder au serveur de fichiers, toute l'équipe compta est bloquée depuis 9h.",
+    "categorie_attendue": "reseau",
+    "priorite_attendue": "critique",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-03",
+    "description": "Mon PC portable ne s'allume plus du tout, même branché sur secteur.",
+    "categorie_attendue": "materiel",
+    "priorite_attendue": "haute",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-04",
+    "description": "L'imprimante du 3e étage affiche une erreur et ne sort plus rien.",
+    "categorie_attendue": "imprimantes",
+    "priorite_attendue": "moyenne",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-05",
+    "description": "Excel se ferme tout seul dès que j'ouvre le fichier de suivi budgétaire.",
+    "categorie_attendue": "logiciels",
+    "priorite_attendue": "moyenne",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-06",
+    "description": "Je souhaiterais obtenir l'accès au dossier partagé Ressources Humaines.",
+    "categorie_attendue": "droits_acces",
+    "priorite_attendue": "basse",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-07",
+    "description": "J'ai reçu un courriel suspect avec une pièce jointe bizarre, je ne l'ai pas ouvert.",
+    "categorie_attendue": "cybersecurite",
+    "priorite_attendue": "haute",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-08",
+    "description": "Le wifi coupe toutes les 5 minutes dans la salle de réunion du 2e.",
+    "categorie_attendue": "reseau",
+    "priorite_attendue": "moyenne",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-09",
+    "description": "sa marche plus",
+    "categorie_attendue": "autre",
+    "priorite_attendue": "moyenne",
+    "difficulte": "vague",
+    "note": "Description inexploitable : doit tomber en autre avec une confiance basse et déclencher une demande d'information."
+  },
+  {
+    "id": "EV-10",
+    "description": "bonjour jarive pas a imprimé depui hier merci",
+    "categorie_attendue": "imprimantes",
+    "priorite_attendue": "moyenne",
+    "difficulte": "fautes",
+    "note": "Fautes d'orthographe multiples, la catégorie reste identifiable."
+  },
+  {
+    "id": "EV-11",
+    "description": "J'ai reçu un mail de la DSI qui me demande de confirmer mon mot de passe en cliquant sur un lien.",
+    "categorie_attendue": "cybersecurite",
+    "priorite_attendue": "haute",
+    "difficulte": "ambigu",
+    "note": "Piège : contient 'mot de passe' mais c'est du phishing, pas une demande de compte."
+  },
+  {
+    "id": "EV-12",
+    "description": "Je suis bien connecté à ma session mais quand j'ouvre l'application de paie elle me dit que je n'ai pas les droits.",
+    "categorie_attendue": "droits_acces",
+    "priorite_attendue": "moyenne",
+    "difficulte": "ambigu",
+    "note": "Piège : frontière avec comptes_authentification. L'utilisateur est authentifié, c'est une habilitation qui manque."
+  },
+  {
+    "id": "EV-13",
+    "description": "Mon compte est verrouillé après plusieurs tentatives de connexion.",
+    "categorie_attendue": "comptes_authentification",
+    "priorite_attendue": "haute",
+    "difficulte": "moyen"
+  },
+  {
+    "id": "EV-14",
+    "description": "L'application de gestion commerciale est inaccessible pour tout le service commercial depuis ce matin.",
+    "categorie_attendue": "logiciels",
+    "priorite_attendue": "critique",
+    "difficulte": "moyen",
+    "note": "Vérifie que l'ampleur (tout un service) fait monter la priorité sans changer la catégorie."
+  },
+  {
+    "id": "EV-15",
+    "description": "Mon clavier a quelques touches qui ne répondent plus, j'arrive à travailler avec le clavier virtuel.",
+    "categorie_attendue": "materiel",
+    "priorite_attendue": "moyenne",
+    "difficulte": "moyen",
+    "note": "Contournement existant (clavier virtuel) : le barème place ce cas en moyenne, pas en basse. Label initialement fixé à 'basse' puis corrigé — il contredisait la règle 'moyenne : un contournement existe' définie avant l'évaluation. Correction du barème, pas alignement sur le modèle."
+  },
+  {
+    "id": "EV-16",
+    "description": "Je pense que mon poste est compromis, il y a des fenêtres qui s'ouvrent toutes seules.",
+    "categorie_attendue": "cybersecurite",
+    "priorite_attendue": "critique",
+    "difficulte": "moyen"
+  },
+  {
+    "id": "EV-17",
+    "description": "Est-ce que quelqu'un peut m'aider à réserver la salle de réunion pour jeudi ?",
+    "categorie_attendue": "autre",
+    "priorite_attendue": "basse",
+    "difficulte": "hors_perimetre",
+    "note": "Demande hors périmètre informatique : ne doit pas être forcée dans une catégorie technique."
+  },
+  {
+    "id": "EV-18",
+    "description": "Le scanner du copieur ne m'envoie plus les documents par mail.",
+    "categorie_attendue": "imprimantes",
+    "priorite_attendue": "moyenne",
+    "difficulte": "ambigu",
+    "note": "Piège : mentionne 'mail' mais le problème porte sur le périphérique."
+  },
+  {
+    "id": "EV-19",
+    "description": "Tout le réseau est down, plus personne ne peut travailler dans le bâtiment.",
+    "categorie_attendue": "reseau",
+    "priorite_attendue": "critique",
+    "difficulte": "facile"
+  },
+  {
+    "id": "EV-20",
+    "description": "La nouvelle version de l'antivirus ralentit énormément mon poste.",
+    "categorie_attendue": "logiciels",
+    "priorite_attendue": "moyenne",
+    "difficulte": "ambigu",
+    "note": "Piège : mentionne 'antivirus' (terme sécurité) mais c'est un problème de performance logicielle, pas un incident de sécurité."
+  }
+]
