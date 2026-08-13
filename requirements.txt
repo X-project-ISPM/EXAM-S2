@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pydantic
+anthropic
+chromadb
+sentence-transformers
+streamlit
+requests
+python-dotenv
