@@ -24,11 +24,44 @@ Organisé par bloc fonctionnel. Chaque ticket a un ID, une estimation indicative
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| CLASS-1 | Écrire le prompt système few-shot avec exemples pour les 8 catégories | 30 min | SETUP-4 |
-| CLASS-2 | Implémenter `classify_ticket()` avec sortie validée par le schéma `Classification` | 30 min | CLASS-1, SETUP-2 |
-| CLASS-3 | Définir les règles de priorité (critique/haute/moyenne/basse) dans le prompt | 20 min | CLASS-1 |
-| CLASS-4 (optionnel) | Ajouter une couche de règles rapides (regex) en complément du LLM pour les cas évidents | 30 min | CLASS-2 |
-| CLASS-5 | Tester sur 5-10 tickets manuels et ajuster le prompt | 30 min | CLASS-2 |
+| ~~CLASS-1~~ ✅ | Prompt système few-shot, 8 catégories + pièges de frontière | 30 min | SETUP-4 |
+| ~~CLASS-2~~ ✅ | `classify_ticket()` validé par `Classification` + routage déterministe vers l'équipe | 30 min | CLASS-1, SETUP-2 |
+| ~~CLASS-3~~ ✅ | Règles de priorité (critique/haute/moyenne/basse), affinées après mesure | 20 min | CLASS-1 |
+| ~~CLASS-4~~ ✅ | Filet de sécurité regex sur la cybersécurité (rattrapage, pas court-circuit) | 30 min | CLASS-2 |
+| ~~CLASS-5~~ ✅ | 20 tickets évalués, prompt ajusté : priorité 80 % → 90 % | 30 min | CLASS-2 |
+
+**Résultats mesurés** (`python -m tests.eval`, 20 tickets, `gemini-3.5-flash-lite`) :
+catégorie **100 %** (rappel et précision à 100 % sur les 8 catégories, y compris les 4
+pièges de frontière, le ticket vague et celui truffé de fautes) ; priorité **95 %**.
+
+**Revue de code — 3 défauts trouvés et corrigés :**
+1. *Faux positif regex* : « anti-virus » (avec trait d'union) déclenchait le filet
+   sécurité, le tiret créant une frontière de mot avant « virus ». Une mise à jour
+   d'antivirus partait en incident critique vers l'équipe sécurité.
+2. *Confiance erronée* : lors d'un reclassement, la confiance du modèle — qui portait sur
+   la catégorie qu'il avait choisie — était reportée telle quelle sur la catégorie
+   substituée. Risque en aval : supprimer la validation humaine au moment précis où l'on
+   contredit le modèle. La confiance est désormais plafonnée en cas de requalification.
+3. *Verdict sollicité puis ignoré* : le prompt demandait au modèle de vérifier s'il
+   s'agissait vraiment d'un incident de sécurité, mais la règle écrasait sa réponse quoi
+   qu'il dise. Il adjudique maintenant explicitement (`incident_securite_avere`) et le
+   filet ne reprend la main que si sa confiance est faible.
+
+**Optimisation** : lissage proactif des appels sous la limite de 15 req/min. L'évaluation
+complète s'exécute désormais sans aucune 429 — auparavant, chaque dépassement imposait
+un délai de reprise pouvant atteindre 57 s.
+
+Décisions prises pendant l'implémentation :
+- **L'équipe n'est pas produite par le LLM** mais dérivée de la catégorie par table de
+  correspondance. Lors d'un test, le modèle avait inventé `"Infrastructure et Reseau"`
+  en texte libre — non reproductible et inexploitable pour du routage.
+- **Le filet regex ne court-circuite pas le LLM**, il rattrape : forcer la catégorie sur
+  un simple mot-clé casserait « courriel demandant mon mot de passe » (phishing, pas
+  gestion de comptes).
+- **Reprise sur quota ajoutée** dans `llm_client.py` : le Free Tier est plafonné à
+  **15 requêtes/minute** (constaté), or le pipeline émettra ~4 appels par ticket.
+- **Limite connue** : à `temperature=0`, 4 appels identiques sur un ticket frontière ont
+  donné 2 `basse` / 2 `moyenne`. La catégorie est restée stable.
 
 ## 🔍 Diagnostic
 
