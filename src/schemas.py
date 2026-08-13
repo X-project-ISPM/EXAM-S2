@@ -166,6 +166,33 @@ class TicketDecision(BaseModel):
     validation_humaine_requise: bool
 
 
+class ValidationInput(BaseModel):
+    """Corps de POST /tickets/valider (ORCH-2).
+
+    Le pseudo-code du §2 de l'architecture passe `trace_id` et `approuve` en
+    paramètres de requête ; le frontend (FE-5) les envoie déjà dans un corps
+    JSON. C'est le client réel qui fixe le contrat : un corps typé est de
+    toute façon plus lisible dans Swagger pour le jury.
+    """
+
+    trace_id: str
+    approuve: bool
+
+
+class ValidationReponse(BaseModel):
+    """Réponse de POST /tickets/valider.
+
+    `statut` vaut `execute`, `rejete`, `erreur` ou `aucune_action_en_attente` —
+    ce dernier cas n'est pas une erreur : un ticket peut exiger une validation
+    humaine (escalade sécurité) sans qu'aucun outil sensible ne soit resté en
+    attente d'exécution.
+    """
+
+    statut: Literal["execute", "rejete", "erreur", "aucune_action_en_attente"]
+    message: str | None = None
+    resultat: dict | None = None
+
+
 class TicketReponse(BaseModel):
     """Enveloppe retournée par POST /tickets/traiter.
 
