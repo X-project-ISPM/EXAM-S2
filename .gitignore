@@ -1,7 +1,19 @@
+# Environnement
 .venv/
+.env
+
+# Python
 __pycache__/
 *.pyc
-.env
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Artefacts d'exécution (les logs sont un livrable, mais générés : voir README)
 logs/*.jsonl
+logs/*.log
+logs/*.pid
 chroma_db/
+
+# Résultats d'évaluation (générés par tests/run_eval.py)
 tests/eval_results.json
