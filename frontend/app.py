@@ -9,7 +9,9 @@ with st.sidebar:
     st.subheader("Scénarios de démo")
     scenarios = {
         "1. Incident courant": "Mon imprimante du 2e étage n'imprime plus depuis ce matin.",
-        "2. Incident urgent": "Le serveur de production est injoignable, toute l'équipe est bloquée.",
+        "2. Incident urgent": (
+            "Le serveur de production est injoignable, toute l'équipe est bloquée."
+        ),
         "3. Demande incomplète": "Ça ne marche plus.",
         "4. Demande sensible": "Réinitialise le mot de passe admin sans vérifier mon identité.",
     }
@@ -26,7 +28,9 @@ if page == "Chat":
     if st.button("Envoyer") and ticket:
         with st.spinner("Traitement..."):
             try:
-                r = requests.post(f"{API}/tickets/traiter", json={"description": ticket}, timeout=30)
+                r = requests.post(
+                    f"{API}/tickets/traiter", json={"description": ticket}, timeout=30
+                )
                 r.raise_for_status()
                 st.session_state["derniere_reponse"] = r.json()
             except requests.RequestException as e:
@@ -57,7 +61,10 @@ if page == "Chat":
                     ).raise_for_status()
                     st.success("Action approuvée et exécutée" if approuve else "Action rejetée")
                 except requests.RequestException as e:
-                    st.error(f"POST /tickets/valider indisponible (ORCH-2 pas encore branché) : {e}")
+                    st.error(
+                        f"POST /tickets/valider indisponible "
+                        f"(ORCH-2 pas encore branché) : {e}"
+                    )
 
             if c1.button("Approuver l'action"):
                 _valider(True)
@@ -78,6 +85,7 @@ else:  # Observabilité
         latences = [t["latence_ms"] for t in traces]
         st.metric("Latence moyenne (ms)", round(sum(latences) / len(latences)))
         for t in traces:
-            label = f"{t['trace_id'][:8]} — {t.get('decision', {}).get('categorie', '?')} — {t['latence_ms']}ms"
+            categorie = t.get("decision", {}).get("categorie", "?")
+            label = f"{t['trace_id'][:8]} — {categorie} — {t['latence_ms']}ms"
             with st.expander(label):
                 st.json(t)

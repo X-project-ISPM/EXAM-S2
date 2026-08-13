@@ -1,10 +1,9 @@
 import json
 from datetime import datetime
-from pathlib import Path
 
 from pydantic import BaseModel
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+from src.config import config
 
 
 class Utilisateur(BaseModel):
@@ -63,7 +62,7 @@ class BaseDeDonnees(BaseModel):
 
 
 def _charger_json(nom_fichier: str) -> list[dict]:
-    chemin = DATA_DIR / nom_fichier
+    chemin = config.dossier_data / nom_fichier
     if not chemin.exists():
         # Les fichiers réels du hackathon ne sont pas encore déposés dans data/ ;
         # ne pas planter le démarrage de l'API pour autant.
@@ -87,8 +86,12 @@ def charger_toutes_les_donnees(
     return BaseDeDonnees(
         utilisateurs=[Utilisateur.model_validate(u) for u in _charger_json(fichier_utilisateurs)],
         equipements=[Equipement.model_validate(e) for e in _charger_json(fichier_equipements)],
-        incidents_actifs=[IncidentActif.model_validate(i) for i in _charger_json(fichier_incidents)],
+        incidents_actifs=[
+            IncidentActif.model_validate(i) for i in _charger_json(fichier_incidents)
+        ],
         kb=[ArticleKB.model_validate(a) for a in _charger_json(fichier_kb)],
-        tickets_historique=[TicketHistorique.model_validate(t) for t in _charger_json(fichier_tickets)],
+        tickets_historique=[
+            TicketHistorique.model_validate(t) for t in _charger_json(fichier_tickets)
+        ],
         services=[Service.model_validate(s) for s in _charger_json(fichier_services)],
     )
