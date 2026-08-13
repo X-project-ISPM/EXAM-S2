@@ -8,10 +8,10 @@ humaine de bout en bout) est dans `test_api.py`.
 """
 
 import pytest
-
-from src import orchestrator
 from src.config import config
 from src.schemas import Classification, DiagnosticInfo, TicketDecision, TicketInput
+
+from src import orchestrator
 
 SAIN = {"danger": False, "raison": None, "couche": None, "verification_llm": "ok"}
 
