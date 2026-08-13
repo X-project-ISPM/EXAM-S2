@@ -14,11 +14,11 @@ Organisé par bloc fonctionnel. Chaque ticket a un ID, une estimation indicative
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| SETUP-1 | Créer la structure de dossiers du projet + `requirements.txt` | 15 min | — |
-| SETUP-2 **[MAJ]** | Définir `schemas.py` : `TicketInput`, `TicketDecision` (incl. `resume`), `Classification`, `DiagnosticInfo` (contrat figé) | 30 min | — |
-| SETUP-3 | Charger les données fournies (tickets, KB, users, équipements, incidents, services) en objets Pydantic dans `models.py` | 45 min | SETUP-1 |
-| SETUP-4 | Configurer l'accès à l'API LLM (clé, wrapper `llm_call()` réutilisable) | 20 min | — |
-| SETUP-5 | Créer l'endpoint `POST /tickets/traiter` avec réponse **factice codée en dur** pour débloquer le frontend immédiatement | 20 min | SETUP-2 |
+| ~~SETUP-1~~ ✅ | Créer la structure de dossiers du projet + `requirements.txt` | 15 min | — |
+| ~~SETUP-2~~ ✅ **[MAJ]** | Définir `schemas.py` : `TicketInput`, `TicketDecision` (incl. `resume`), `Classification`, `DiagnosticInfo` (contrat figé) | 30 min | — |
+| ~~SETUP-3~~ ✅ | Charger les données fournies (tickets, KB, users, équipements, incidents, services) en objets Pydantic dans `models.py` — données fixture ajoutées après coup, voir §7 | 45 min | SETUP-1 |
+| ~~SETUP-4~~ ✅ | Configurer l'accès à l'API LLM (clé, wrapper `llm_call()` réutilisable) | 20 min | — |
+| ~~SETUP-5~~ ✅ | Endpoint `POST /tickets/traiter`, remplacé depuis par le pipeline réel (ORCH-1) | 20 min | SETUP-2 |
 
 ## 🏷️ Classification
 
@@ -156,21 +156,21 @@ plafond de fragments par source pour qu'un article long ne monopolise pas le top
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| AGT-1 | Spécifier les 8 outils (nom, description, paramètres, sensibilité) dans `OUTILS` | 30 min | SETUP-3 |
-| AGT-2 | Implémenter les 4 outils de consultation (`rechercher_utilisateur`, `consulter_equipement`, `verifier_etat_service`, `rechercher_incidents_actifs`) | 45 min | AGT-1, SETUP-3 |
-| AGT-3 | Implémenter les 4 outils d'action (`creer_ticket`, `mettre_a_jour_ticket`, `affecter_ticket`, `escalader_vers_technicien`) | 45 min | AGT-1, SETUP-3 |
-| AGT-4 | Implémenter `valider_parametres()` et `executer_outil()` avec gestion d'erreurs | 30 min | AGT-2, AGT-3 |
-| AGT-5 | Implémenter la boucle `run_agent()` avec function calling et limite d'itérations | 45 min | AGT-4, SETUP-4 |
-| AGT-6 | Brancher la logique de validation humaine (`attente_validation_humaine`) dans la boucle | 25 min | AGT-5 |
-| AGT-7 | Tester le scénario 1 (incident courant) et 2 (incident urgent) de bout en bout | 30 min | AGT-5, RAG-4 |
+| ~~AGT-1~~ ✅ | Spécifier les 8 outils (nom, description, paramètres, sensibilité) dans `OUTILS` | 30 min | SETUP-3 |
+| ~~AGT-2~~ ✅ | Implémenter les 4 outils de consultation (`rechercher_utilisateur`, `consulter_equipement`, `verifier_etat_service`, `rechercher_incidents_actifs`) | 45 min | AGT-1, SETUP-3 |
+| ~~AGT-3~~ ✅ | Implémenter les 4 outils d'action (`creer_ticket`, `mettre_a_jour_ticket`, `affecter_ticket`, `escalader_vers_technicien`) | 45 min | AGT-1, SETUP-3 |
+| ~~AGT-4~~ ✅ | Implémenter `valider_parametres()` et `executer_outil()` avec gestion d'erreurs | 30 min | AGT-2, AGT-3 |
+| ~~AGT-5~~ ✅ | Implémenter la boucle `run_agent()` avec function calling et limite d'itérations | 45 min | AGT-4, SETUP-4 |
+| ~~AGT-6~~ ✅ | Brancher la logique de validation humaine (`attente_validation_humaine`) dans la boucle | 25 min | AGT-5 |
+| ~~AGT-7~~ ✅ | Scénarios 1 et 2 vérifiés en réel via `evaluer_scenarios_obligatoires()` (EVAL-3) et le pipeline complet (ORCH-5), avec de vraies données fixture pour les outils de consultation | 30 min | AGT-5, RAG-4 |
 
 ## 📋 Sortie structurée
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| OUT-1 | Finaliser le schéma `TicketDecision` complet (le champ `resume` est déjà posé dans SETUP-2, ici on verrouille validateurs/types) | 15 min | SETUP-2 |
-| OUT-2 | Implémenter la stratégie de retry sur échec de validation Pydantic | 25 min | OUT-1 |
-| OUT-3 | Implémenter `reponse_erreur_controlee()` pour ne jamais renvoyer d'erreur nue | 20 min | OUT-1 |
+| ~~OUT-1~~ ✅ | Schéma `TicketDecision` complet, validateurs/types verrouillés | 15 min | SETUP-2 |
+| ~~OUT-2~~ ✅ | `generer_avec_retry()` implémentée et testée ; **limite connue** : pas encore appelée par un site d'appel réel du pipeline (voir bloc Orchestrateur) — la dégradation reste sûre sans elle, juste moins complète | 25 min | OUT-1 |
+| ~~OUT-3~~ ✅ | `reponse_erreur_controlee()` — jamais d'erreur nue, secrets masqués (SEC-5) | 20 min | OUT-1 |
 
 ## 🛡️ Sécurité et garde-fous
 
@@ -379,14 +379,14 @@ sûre (jamais d'erreur nue), simplement moins complète qu'elle pourrait l'être
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| FE-1 | Structure de base Streamlit (layout, sidebar, navigation) | 20 min | — |
-| FE-2 | Zone de saisie + bouton envoi + appel à `POST /tickets/traiter` | 25 min | SETUP-5 (stub suffisant pour démarrer) |
-| FE-3 **[MAJ]** | Affichage de la décision (résumé (`resume`) mis en avant en tête de réponse + métriques + `st.json`) | 25 min | FE-2 |
-| FE-4 | Boutons de scénarios pré-remplis dans la sidebar | 20 min | FE-1 |
-| FE-5 | UI de validation humaine (boutons approuver/rejeter) | 25 min | FE-3, ORCH-2 |
-| FE-6 | Onglet Observabilité (liste des traces, métriques agrégées) | 30 min | OBS-4 |
-| FE-7 | Gestion des erreurs réseau côté frontend | 15 min | FE-2 |
-| FE-8 | Passage du stub à la vraie API une fois `ORCH-1` prêt | 15 min | ORCH-1, FE-2 |
+| ~~FE-1~~ ✅ | Structure de base Streamlit (layout, sidebar, navigation) | 20 min | — |
+| ~~FE-2~~ ✅ | Zone de saisie + bouton envoi + appel à `POST /tickets/traiter` | 25 min | SETUP-5 (stub suffisant pour démarrer) |
+| ~~FE-3~~ ✅ **[MAJ]** | Affichage de la décision (résumé (`resume`) mis en avant en tête de réponse + métriques + `st.json`) | 25 min | FE-2 |
+| ~~FE-4~~ ✅ | Boutons de scénarios pré-remplis dans la sidebar | 20 min | FE-1 |
+| ~~FE-5~~ ✅ | UI de validation humaine (boutons approuver/rejeter) | 25 min | FE-3, ORCH-2 |
+| ~~FE-6~~ ✅ | Onglet Observabilité (liste des traces, métriques agrégées) | 30 min | OBS-4 |
+| ~~FE-7~~ ✅ | Gestion des erreurs réseau côté frontend | 15 min | FE-2 |
+| ~~FE-8~~ ✅ | Frontend branché sur l'API réelle. **Bug trouvé et corrigé après coup** : `API_URL` par défaut pointait sur l'instance Render déployée, pas sur l'API locale — `run.sh`/`run.ps1` ne la surchargeaient jamais, donc une exécution locale parlait à Render en silence (timeout 30s trop court en prime). Corrigé : `run.sh`/`run.ps1` fixent `API_URL=http://localhost:8000`, timeout porté à 150s. Revérifié en réel (navigateur + serveurs). | 15 min | ORCH-1, FE-2 |
 
 ## ✅ Évaluation
 
@@ -395,8 +395,8 @@ sûre (jamais d'erreur nue), simplement moins complète qu'elle pourrait l'être
 | ~~EVAL-1~~ ✅ | `tests/eval_dataset.json` — 20 tickets, 8 catégories, pièges de frontière | 40 min | — |
 | ~~EVAL-2~~ ✅ **[MAJ]** | `evaluer_classification()` — recall **et précision** par catégorie (matrice de confusion simple) dans `tests/eval.py` | 30 min | EVAL-1 ✅, CLASS-2 ✅ |
 | ~~RAG-9~~ ✅ *(apparenté)* | `evaluer_rag()` — rappel@k, précision citations, détection hors-corpus, dans le même `tests/eval.py` | 25 min | RAG-8 ✅ |
-| EVAL-3 | Implémenter `evaluer_scenarios_obligatoires()` | 20 min | ORCH-5 |
-| ~~EVAL-4~~ ✅ | `tests/eval.py` (`__main__`, pas un fichier `run_eval.py` séparé) exécute classification + RAG et écrit `tests/eval_results.json` via `sauvegarder()` — c'est le livrable "résultats de l'évaluation". **Committé pour la première fois** : le fichier était généré en local puis recopié à la main dans le README, mais `.gitignore` l'excluait du dépôt — corrigé. | 20 min | EVAL-2 ✅, RAG-9 ✅ (EVAL-3 sur scénarios obligatoires reste séparé, bloqué sur ORCH-5) |
+| ~~EVAL-3~~ ✅ | `evaluer_scenarios_obligatoires()` dans `backend/tests/eval.py` — rejoue les 4 scénarios contre le vrai pipeline, critères sur les garanties du code (pas la formulation du modèle). **4/4 réussis**, résultats dans `eval_results.json` (section `scenarios_obligatoires`) | 20 min | ORCH-5 ✅ |
+| ~~EVAL-4~~ ✅ | `backend/tests/eval.py` (`__main__`, pas un fichier `run_eval.py` séparé) exécute classification + RAG + scénarios obligatoires et écrit `eval_results.json` via `sauvegarder()` — le livrable "résultats de l'évaluation". Régénéré avec les données fixture réelles : catégorie 100 %, priorité 90 %, RAG 96 %/100 %/100 %, scénarios 4/4 | 20 min | EVAL-2 ✅, RAG-9 ✅, EVAL-3 ✅ |
 | ~~EVAL-5~~ ✅ | Analyse des erreurs et limites — section "Résultats de classification"/"Résultats du RAG" (échecs détaillés) + "Limites connues" du README | 25 min | EVAL-4 ✅ |
 
 ## 📄 Livrables et documentation
