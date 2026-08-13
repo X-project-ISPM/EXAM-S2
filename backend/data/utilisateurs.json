@@ -1,0 +1,10 @@
+[
+  {"id": "U-001", "nom": "Rakoto Hery", "service": "comptabilite", "equipements": ["PC-001"]},
+  {"id": "U-002", "nom": "Rabe Lala", "service": "ressources_humaines", "equipements": ["PC-002"]},
+  {"id": "U-003", "nom": "Andria Tojo", "service": "production", "equipements": ["PC-003"]},
+  {"id": "U-004", "nom": "Ravel Nomena", "service": "direction", "equipements": ["PC-004"]},
+  {"id": "U-005", "nom": "Rasoa Miora", "service": "marketing", "equipements": ["PC-005"]},
+  {"id": "U-006", "nom": "Andria Fy", "service": "informatique", "equipements": ["PC-006"]},
+  {"id": "U-007", "nom": "Razafy Tiana", "service": "production", "equipements": ["PORT-007"]},
+  {"id": "U-008", "nom": "Rakotondrabe Nirina", "service": "comptabilite", "equipements": []}
+]

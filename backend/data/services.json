@@ -1,0 +1,9 @@
+[
+  {"nom": "reseau", "statut": "operationnel"},
+  {"nom": "messagerie", "statut": "operationnel"},
+  {"nom": "impression", "statut": "degrade"},
+  {"nom": "authentification", "statut": "operationnel"},
+  {"nom": "applications_metier", "statut": "operationnel"},
+  {"nom": "production", "statut": "indisponible"},
+  {"nom": "vpn", "statut": "operationnel"}
+]
