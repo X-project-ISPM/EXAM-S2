@@ -427,6 +427,39 @@ sûre (jamais d'erreur nue), simplement moins complète qu'elle pourrait l'être
 - Documenter explicitement les limites et les résultats mesurés, plutôt que de présenter un prototype comme un système “parfait”.
 - Réutiliser les fichiers de lancement et les traces observées comme éléments de preuve pendant la démonstration et la remise.
 
+## 🚀 Durcissement déploiement (Render)
+
+Bloc réalisé après la remise initiale (DOC-1 à DOC-5), pour fiabiliser le déploiement sur
+Render (tier gratuit, 512 Mo RAM, volume éphémère) sans changer le comportement métier du
+pipeline.
+
+| ID | Ticket | Estimation | Dépendances |
+|---|---|---|---|
+| ~~DEPLOY-1~~ ✅ | `backend/Procfile` + `backend/runtime.txt` (Python 3.11.9) pour le déploiement Render | 10 min | — |
+| ~~DEPLOY-2~~ ✅ | `pyproject.toml` : `package-dir` vers `backend/`, `testpaths` vers `backend/tests`, `tool.ruff.src = ["backend"]` — sans ce dernier réglage, `ruff` classe `src` comme bibliothèque tierce depuis la restructuration et `ruff check` échoue sur tous les fichiers de test | 15 min | — |
+| ~~DEPLOY-3~~ ✅ | RAG migré sur `embedding_functions.ONNXMiniLM_L6_V2()` (au lieu de `SentenceTransformerEmbeddingFunction`) : empreinte mémoire sous les 512 Mo du tier gratuit Render, élimine les crash 502 OOM observés en production | 20 min | RAG-1 ✅ |
+| ~~DEPLOY-4~~ ✅ | Ingestion automatique de la KB au démarrage de l'API (`lifespan`, `api.py`) si `nombre_de_fragments() == 0` — le volume ChromaDB de Render étant éphémère, un redeploy repartait sinon avec un index vide sans intervention manuelle | 15 min | RAG-3 ✅ |
+| ~~DEPLOY-5~~ ✅ | `GET /health/diagnostic?test=gemini\|chromadb\|data` — isole quel composant échoue en production (distingue un OOM ChromaDB d'une clé Gemini absente ou d'un fichier de données manquant), 6 tests ajoutés dans `test_api.py` | 20 min | ORCH-4 ✅ |
+| ~~DEPLOY-6~~ ✅ | Refonte complète de `frontend/app.py` en tableau de bord type SaaS : navigation par pages (« Chat / Résolution », « Observabilité », « Explorateur de Données » avec onglets KB/utilisateurs/services/historique), icônes SVG vectorielles (zéro emoji), métriques en anneau, graphique d'activité | 90 min | FE-6 ✅ |
+| ~~DEPLOY-7~~ ✅ | `livrables/README.md` — index de liens vers les 5 documents du bloc « Livrables et documentation » (DOC-1 à DOC-5) + liens vers les instances déployées (Streamlit, Render) | 15 min | DOC-5 ✅ |
+
+**Décision** : la fonction d'embedding ONNX porte le même modèle de base
+(`all-MiniLM-L6-v2`) que `SentenceTransformerEmbeddingFunction` d'origine, seul le runtime
+d'inférence change — les résultats mesurés de RAG-7/RAG-9 (rappel@k 96 %, précision des
+citations 100 %) restent donc valides sans nouvelle calibration du seuil.
+
+**Gestion de conflit ajoutée dans `rag.py`** : si une collection ChromaDB du nom attendu
+existe déjà avec une autre fonction d'embedding (dimension de vecteur différente — cas d'un
+volume Render créé avant la migration ONNX), `_collection()` la supprime et la recrée au
+lieu de lever une erreur au démarrage.
+
+**Limite découverte** : `_enregistrer_ticket_historique()` (appelée depuis
+`observability.log_trace()`) ajoute désormais chaque ticket traité par l'API — y compris en
+test manuel ou en démo — à `backend/data/tickets_historique.json`, qui est un fichier
+versionné. Des tickets de test (« x », « premier »...) s'y sont déjà mêlés aux données
+fixture d'origine. Pas bloquant pour la démo, mais à nettoyer avant toute réutilisation de
+ce fichier comme jeu de données de référence propre.
+
 ---
 
 ## Ordre de priorité si le temps manque
