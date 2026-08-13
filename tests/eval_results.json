@@ -1,0 +1,1195 @@
+{
+  "date": "2026-08-13T12:52:28.165380+00:00",
+  "modele": "gemini-3.5-flash-lite",
+  "modele_embedding": "sentence-transformers/all-MiniLM-L6-v2",
+  "seuil_rag": 0.75,
+  "classification": {
+    "total": 20,
+    "exactitude_categorie": 1.0,
+    "exactitude_priorite": 0.95,
+    "par_categorie": {
+      "autre": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 2,
+        "predits": 2
+      },
+      "comptes_authentification": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 2,
+        "predits": 2
+      },
+      "cybersecurite": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 3,
+        "predits": 3
+      },
+      "droits_acces": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 2,
+        "predits": 2
+      },
+      "imprimantes": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 3,
+        "predits": 3
+      },
+      "logiciels": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 3,
+        "predits": 3
+      },
+      "materiel": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 2,
+        "predits": 2
+      },
+      "reseau": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 3,
+        "predits": 3
+      }
+    },
+    "par_priorite": {
+      "basse": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 2,
+        "predits": 2
+      },
+      "critique": {
+        "rappel": 1.0,
+        "precision": 1.0,
+        "support": 4,
+        "predits": 4
+      },
+      "haute": {
+        "rappel": 1.0,
+        "precision": 0.8333333333333334,
+        "support": 5,
+        "predits": 6
+      },
+      "moyenne": {
+        "rappel": 0.8888888888888888,
+        "precision": 1.0,
+        "support": 9,
+        "predits": 8
+      }
+    },
+    "par_difficulte": {
+      "ambigu": {
+        "total": 4,
+        "justes": 4,
+        "taux": 1.0
+      },
+      "facile": {
+        "total": 9,
+        "justes": 9,
+        "taux": 1.0
+      },
+      "fautes": {
+        "total": 1,
+        "justes": 1,
+        "taux": 1.0
+      },
+      "hors_perimetre": {
+        "total": 1,
+        "justes": 1,
+        "taux": 1.0
+      },
+      "moyen": {
+        "total": 4,
+        "justes": 4,
+        "taux": 1.0
+      },
+      "vague": {
+        "total": 1,
+        "justes": 1,
+        "taux": 1.0
+      }
+    },
+    "echecs": [
+      {
+        "id": "EV-12",
+        "description": "Je suis bien connecté à ma session mais quand j'ouvre l'application de paie elle me dit que je n'ai pas les droits.",
+        "difficulte": "ambigu",
+        "categorie_attendue": "droits_acces",
+        "categorie_obtenue": "droits_acces",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "haute",
+        "priorite_ok": false,
+        "equipe": "gestion_identites",
+        "confiance": 0.95
+      }
+    ],
+    "details": [
+      {
+        "id": "EV-01",
+        "description": "Bonjour, j'ai oublié mon mot de passe et je n'arrive plus à me connecter ce matin.",
+        "difficulte": "facile",
+        "categorie_attendue": "comptes_authentification",
+        "categorie_obtenue": "comptes_authentification",
+        "categorie_ok": true,
+        "priorite_attendue": "haute",
+        "priorite_obtenue": "haute",
+        "priorite_ok": true,
+        "equipe": "support_niveau_1",
+        "confiance": 1.0
+      },
+      {
+        "id": "EV-02",
+        "description": "Impossible d'accéder au serveur de fichiers, toute l'équipe compta est bloquée depuis 9h.",
+        "difficulte": "facile",
+        "categorie_attendue": "reseau",
+        "categorie_obtenue": "reseau",
+        "categorie_ok": true,
+        "priorite_attendue": "critique",
+        "priorite_obtenue": "critique",
+        "priorite_ok": true,
+        "equipe": "infrastructure_reseau",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-03",
+        "description": "Mon PC portable ne s'allume plus du tout, même branché sur secteur.",
+        "difficulte": "facile",
+        "categorie_attendue": "materiel",
+        "categorie_obtenue": "materiel",
+        "categorie_ok": true,
+        "priorite_attendue": "haute",
+        "priorite_obtenue": "haute",
+        "priorite_ok": true,
+        "equipe": "support_materiel",
+        "confiance": 1.0
+      },
+      {
+        "id": "EV-04",
+        "description": "L'imprimante du 3e étage affiche une erreur et ne sort plus rien.",
+        "difficulte": "facile",
+        "categorie_attendue": "imprimantes",
+        "categorie_obtenue": "imprimantes",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "moyenne",
+        "priorite_ok": true,
+        "equipe": "support_materiel",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-05",
+        "description": "Excel se ferme tout seul dès que j'ouvre le fichier de suivi budgétaire.",
+        "difficulte": "facile",
+        "categorie_attendue": "logiciels",
+        "categorie_obtenue": "logiciels",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "moyenne",
+        "priorite_ok": true,
+        "equipe": "applications_metier",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-06",
+        "description": "Je souhaiterais obtenir l'accès au dossier partagé Ressources Humaines.",
+        "difficulte": "facile",
+        "categorie_attendue": "droits_acces",
+        "categorie_obtenue": "droits_acces",
+        "categorie_ok": true,
+        "priorite_attendue": "basse",
+        "priorite_obtenue": "basse",
+        "priorite_ok": true,
+        "equipe": "gestion_identites",
+        "confiance": 1.0
+      },
+      {
+        "id": "EV-07",
+        "description": "J'ai reçu un courriel suspect avec une pièce jointe bizarre, je ne l'ai pas ouvert.",
+        "difficulte": "facile",
+        "categorie_attendue": "cybersecurite",
+        "categorie_obtenue": "cybersecurite",
+        "categorie_ok": true,
+        "priorite_attendue": "haute",
+        "priorite_obtenue": "haute",
+        "priorite_ok": true,
+        "equipe": "securite_si",
+        "confiance": 1.0
+      },
+      {
+        "id": "EV-08",
+        "description": "Le wifi coupe toutes les 5 minutes dans la salle de réunion du 2e.",
+        "difficulte": "facile",
+        "categorie_attendue": "reseau",
+        "categorie_obtenue": "reseau",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "moyenne",
+        "priorite_ok": true,
+        "equipe": "infrastructure_reseau",
+        "confiance": 0.9
+      },
+      {
+        "id": "EV-09",
+        "description": "sa marche plus",
+        "difficulte": "vague",
+        "categorie_attendue": "autre",
+        "categorie_obtenue": "autre",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "moyenne",
+        "priorite_ok": true,
+        "equipe": "support_niveau_1",
+        "confiance": 0.2
+      },
+      {
+        "id": "EV-10",
+        "description": "bonjour jarive pas a imprimé depui hier merci",
+        "difficulte": "fautes",
+        "categorie_attendue": "imprimantes",
+        "categorie_obtenue": "imprimantes",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "moyenne",
+        "priorite_ok": true,
+        "equipe": "support_materiel",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-11",
+        "description": "J'ai reçu un mail de la DSI qui me demande de confirmer mon mot de passe en cliquant sur un lien.",
+        "difficulte": "ambigu",
+        "categorie_attendue": "cybersecurite",
+        "categorie_obtenue": "cybersecurite",
+        "categorie_ok": true,
+        "priorite_attendue": "haute",
+        "priorite_obtenue": "haute",
+        "priorite_ok": true,
+        "equipe": "securite_si",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-12",
+        "description": "Je suis bien connecté à ma session mais quand j'ouvre l'application de paie elle me dit que je n'ai pas les droits.",
+        "difficulte": "ambigu",
+        "categorie_attendue": "droits_acces",
+        "categorie_obtenue": "droits_acces",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "haute",
+        "priorite_ok": false,
+        "equipe": "gestion_identites",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-13",
+        "description": "Mon compte est verrouillé après plusieurs tentatives de connexion.",
+        "difficulte": "moyen",
+        "categorie_attendue": "comptes_authentification",
+        "categorie_obtenue": "comptes_authentification",
+        "categorie_ok": true,
+        "priorite_attendue": "haute",
+        "priorite_obtenue": "haute",
+        "priorite_ok": true,
+        "equipe": "support_niveau_1",
+        "confiance": 1.0
+      },
+      {
+        "id": "EV-14",
+        "description": "L'application de gestion commerciale est inaccessible pour tout le service commercial depuis ce matin.",
+        "difficulte": "moyen",
+        "categorie_attendue": "logiciels",
+        "categorie_obtenue": "logiciels",
+        "categorie_ok": true,
+        "priorite_attendue": "critique",
+        "priorite_obtenue": "critique",
+        "priorite_ok": true,
+        "equipe": "applications_metier",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-15",
+        "description": "Mon clavier a quelques touches qui ne répondent plus, j'arrive à travailler avec le clavier virtuel.",
+        "difficulte": "moyen",
+        "categorie_attendue": "materiel",
+        "categorie_obtenue": "materiel",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "moyenne",
+        "priorite_ok": true,
+        "equipe": "support_materiel",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-16",
+        "description": "Je pense que mon poste est compromis, il y a des fenêtres qui s'ouvrent toutes seules.",
+        "difficulte": "moyen",
+        "categorie_attendue": "cybersecurite",
+        "categorie_obtenue": "cybersecurite",
+        "categorie_ok": true,
+        "priorite_attendue": "critique",
+        "priorite_obtenue": "critique",
+        "priorite_ok": true,
+        "equipe": "securite_si",
+        "confiance": 1.0
+      },
+      {
+        "id": "EV-17",
+        "description": "Est-ce que quelqu'un peut m'aider à réserver la salle de réunion pour jeudi ?",
+        "difficulte": "hors_perimetre",
+        "categorie_attendue": "autre",
+        "categorie_obtenue": "autre",
+        "categorie_ok": true,
+        "priorite_attendue": "basse",
+        "priorite_obtenue": "basse",
+        "priorite_ok": true,
+        "equipe": "support_niveau_1",
+        "confiance": 0.9
+      },
+      {
+        "id": "EV-18",
+        "description": "Le scanner du copieur ne m'envoie plus les documents par mail.",
+        "difficulte": "ambigu",
+        "categorie_attendue": "imprimantes",
+        "categorie_obtenue": "imprimantes",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "moyenne",
+        "priorite_ok": true,
+        "equipe": "support_materiel",
+        "confiance": 0.95
+      },
+      {
+        "id": "EV-19",
+        "description": "Tout le réseau est down, plus personne ne peut travailler dans le bâtiment.",
+        "difficulte": "facile",
+        "categorie_attendue": "reseau",
+        "categorie_obtenue": "reseau",
+        "categorie_ok": true,
+        "priorite_attendue": "critique",
+        "priorite_obtenue": "critique",
+        "priorite_ok": true,
+        "equipe": "infrastructure_reseau",
+        "confiance": 1.0
+      },
+      {
+        "id": "EV-20",
+        "description": "La nouvelle version de l'antivirus ralentit énormément mon poste.",
+        "difficulte": "ambigu",
+        "categorie_attendue": "logiciels",
+        "categorie_obtenue": "logiciels",
+        "categorie_ok": true,
+        "priorite_attendue": "moyenne",
+        "priorite_obtenue": "moyenne",
+        "priorite_ok": true,
+        "equipe": "applications_metier",
+        "confiance": 0.9
+      }
+    ]
+  },
+  "rag": {
+    "total": 34,
+    "questions_couvertes": 26,
+    "questions_hors_corpus": 8,
+    "rappel_at_k": 0.962,
+    "precision_citations": 1.0,
+    "detection_hors_corpus": 1.0,
+    "reponses_certaines_couvertes": 0.923,
+    "echecs": [
+      {
+        "id": "RQ-22",
+        "question": "Un fichier client a été envoyé par erreur à une adresse externe.",
+        "hors_corpus": false,
+        "source_attendue": "KB-SEC-05",
+        "sources_retrouvees": [
+          "KB-LOG-12",
+          "KB-NET-04",
+          "KB-AUTH-02",
+          "KB-ACC-07",
+          "KB-SEC-03",
+          "KB-NET-07",
+          "KB-IMP-03",
+          "KB-SEC-01"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": false,
+        "citations_fondees": true,
+        "rejet_ok": null
+      }
+    ],
+    "details": [
+      {
+        "id": "RQ-01",
+        "question": "J'ai oublié mon mot de passe, je n'arrive plus à ouvrir ma session.",
+        "hors_corpus": false,
+        "source_attendue": "KB-AUTH-01",
+        "sources_retrouvees": [
+          "KB-AUTH-01",
+          "KB-ACC-07",
+          "KB-MAT-02",
+          "KB-SEC-05",
+          "KB-AUTH-02",
+          "KB-PRO-04",
+          "KB-NET-07",
+          "KB-IMP-01"
+        ],
+        "sources_citees": [
+          "KB-AUTH-01"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-02",
+        "question": "Mon compte s'est bloqué après plusieurs essais de connexion.",
+        "hors_corpus": false,
+        "source_attendue": "KB-AUTH-02",
+        "sources_retrouvees": [
+          "KB-ACC-07",
+          "KB-AUTH-02",
+          "KB-SEC-03",
+          "KB-PRO-04",
+          "KB-MAT-02",
+          "KB-SEC-05",
+          "KB-PRO-09",
+          "KB-PRO-09"
+        ],
+        "sources_citees": [
+          "KB-AUTH-02"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-03",
+        "question": "Mon poste n'a plus accès au réseau depuis ce matin.",
+        "hors_corpus": false,
+        "source_attendue": "KB-NET-04",
+        "sources_retrouvees": [
+          "KB-PRO-09",
+          "KB-NET-09",
+          "KB-PRO-04",
+          "KB-SEC-03",
+          "KB-PRO-09",
+          "KB-MAT-02",
+          "KB-ACC-07",
+          "KB-NET-04"
+        ],
+        "sources_citees": [
+          "KB-NET-04"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-04",
+        "question": "Je n'arrive pas à me connecter au VPN depuis chez moi.",
+        "hors_corpus": false,
+        "source_attendue": "KB-NET-07",
+        "sources_retrouvees": [
+          "KB-NET-07",
+          "KB-NET-04",
+          "KB-AUTH-02",
+          "KB-MAT-02",
+          "KB-LOG-12",
+          "KB-NET-09",
+          "KB-MAT-05",
+          "KB-ACC-07"
+        ],
+        "sources_citees": [
+          "KB-NET-07"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-05",
+        "question": "Tout est très lent sur le réseau, plusieurs collègues se plaignent.",
+        "hors_corpus": false,
+        "source_attendue": "KB-NET-09",
+        "sources_retrouvees": [
+          "KB-NET-09",
+          "KB-ACC-07",
+          "KB-PRO-04",
+          "KB-SEC-03",
+          "KB-AUTH-02",
+          "KB-NET-04",
+          "KB-PRO-09",
+          "KB-SEC-05"
+        ],
+        "sources_citees": [
+          "KB-NET-09"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-06",
+        "question": "Mon ordinateur portable ne s'allume plus du tout.",
+        "hors_corpus": false,
+        "source_attendue": "KB-MAT-02",
+        "sources_retrouvees": [
+          "KB-ACC-07",
+          "KB-MAT-02",
+          "KB-AUTH-03",
+          "KB-IMP-03",
+          "KB-ACC-02",
+          "KB-PRO-04",
+          "KB-IMP-01",
+          "KB-PRO-09"
+        ],
+        "sources_citees": [
+          "KB-MAT-02"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-07",
+        "question": "Rien ne sort de l'imprimante alors que j'ai lancé l'impression.",
+        "hors_corpus": false,
+        "source_attendue": "KB-IMP-01",
+        "sources_retrouvees": [
+          "KB-IMP-01",
+          "KB-SEC-01",
+          "KB-SEC-05",
+          "KB-NET-09",
+          "KB-ACC-07",
+          "KB-IMP-06",
+          "KB-PRO-09",
+          "KB-PRO-01"
+        ],
+        "sources_citees": [
+          "KB-IMP-01"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-08",
+        "question": "Le copieur ne m'envoie plus mes documents numérisés par courriel.",
+        "hors_corpus": false,
+        "source_attendue": "KB-IMP-03",
+        "sources_retrouvees": [
+          "KB-IMP-03",
+          "KB-ACC-07",
+          "KB-PRO-09",
+          "KB-PRO-04",
+          "KB-PRO-09",
+          "KB-IMP-01",
+          "KB-MAT-02",
+          "KB-AUTH-02"
+        ],
+        "sources_citees": [
+          "KB-IMP-03"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-09",
+        "question": "Mon tableur se ferme tout seul quand j'ouvre un fichier précis.",
+        "hors_corpus": false,
+        "source_attendue": "KB-LOG-05",
+        "sources_retrouvees": [
+          "KB-SEC-03",
+          "KB-ACC-07",
+          "KB-LOG-05",
+          "KB-SEC-05",
+          "KB-MAT-02",
+          "KB-AUTH-02",
+          "KB-PRO-09",
+          "KB-PRO-04"
+        ],
+        "sources_citees": [
+          "KB-LOG-05"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-10",
+        "question": "Mon poste est devenu très lent depuis la mise à jour de l'antivirus.",
+        "hors_corpus": false,
+        "source_attendue": "KB-LOG-08",
+        "sources_retrouvees": [
+          "KB-LOG-08",
+          "KB-SEC-03",
+          "KB-PRO-04",
+          "KB-AUTH-02",
+          "KB-PRO-09",
+          "KB-NET-11",
+          "KB-NET-09",
+          "KB-ACC-07"
+        ],
+        "sources_citees": [
+          "KB-LOG-08"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-11",
+        "question": "Je voudrais obtenir l'accès au dossier partagé de la comptabilité.",
+        "hors_corpus": false,
+        "source_attendue": "KB-ACC-02",
+        "sources_retrouvees": [
+          "KB-ACC-02",
+          "KB-ACC-07",
+          "KB-PRO-01",
+          "KB-SEC-05",
+          "KB-ACC-04",
+          "KB-SEC-03",
+          "KB-PRO-09",
+          "KB-AUTH-02"
+        ],
+        "sources_citees": [
+          "KB-ACC-02"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-12",
+        "question": "L'application de paie affiche que je n'ai pas les droits nécessaires.",
+        "hors_corpus": false,
+        "source_attendue": "KB-ACC-04",
+        "sources_retrouvees": [
+          "KB-ACC-04",
+          "KB-SEC-03",
+          "KB-ACC-02",
+          "KB-ACC-07",
+          "KB-NET-09",
+          "KB-PRO-01",
+          "KB-AUTH-02",
+          "KB-IMP-01"
+        ],
+        "sources_citees": [
+          "KB-ACC-04"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-13",
+        "question": "J'ai reçu un courriel douteux avec une pièce jointe, que dois-je faire ?",
+        "hors_corpus": false,
+        "source_attendue": "KB-SEC-01",
+        "sources_retrouvees": [
+          "KB-SEC-01",
+          "KB-PRO-04",
+          "KB-ACC-07",
+          "KB-NET-09",
+          "KB-PRO-09",
+          "KB-SEC-05",
+          "KB-IMP-06",
+          "KB-MAT-02"
+        ],
+        "sources_citees": [
+          "KB-SEC-01"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-14",
+        "question": "Des fenêtres s'ouvrent toutes seules sur mon poste, je m'inquiète.",
+        "hors_corpus": false,
+        "source_attendue": "KB-SEC-03",
+        "sources_retrouvees": [
+          "KB-MAT-02",
+          "KB-NET-11",
+          "KB-SEC-03",
+          "KB-PRO-04",
+          "KB-PRO-09",
+          "KB-NET-04",
+          "KB-AUTH-02",
+          "KB-ACC-07"
+        ],
+        "sources_citees": [
+          "KB-SEC-03"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-15",
+        "question": "Sous quel délai un incident critique doit-il être escaladé ?",
+        "hors_corpus": false,
+        "source_attendue": "KB-PRO-01",
+        "sources_retrouvees": [
+          "KB-PRO-01",
+          "KB-SEC-05",
+          "KB-SEC-01",
+          "KB-MAT-02",
+          "KB-IMP-06",
+          "KB-SEC-03",
+          "KB-IMP-01",
+          "KB-PRO-09"
+        ],
+        "sources_citees": [
+          "KB-PRO-01"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-16",
+        "question": "J'ai changé de téléphone et l'application d'authentification ne marche plus.",
+        "hors_corpus": false,
+        "source_attendue": "KB-AUTH-03",
+        "sources_retrouvees": [
+          "KB-AUTH-03",
+          "KB-ACC-07",
+          "KB-ACC-04",
+          "KB-AUTH-01",
+          "KB-PRO-01",
+          "KB-PRO-09",
+          "KB-AUTH-02",
+          "KB-SEC-03"
+        ],
+        "sources_citees": [
+          "KB-AUTH-03"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-17",
+        "question": "Mon wifi se coupe toutes les cinq minutes en salle de réunion.",
+        "hors_corpus": false,
+        "source_attendue": "KB-NET-11",
+        "sources_retrouvees": [
+          "KB-NET-11",
+          "KB-NET-04",
+          "KB-NET-07",
+          "KB-PRO-04",
+          "KB-LOG-12",
+          "KB-PRO-09",
+          "KB-SEC-03",
+          "KB-AUTH-02"
+        ],
+        "sources_citees": [
+          "KB-NET-11"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-18",
+        "question": "Mon poste est allumé, les ventilateurs tournent, mais l'écran reste noir.",
+        "hors_corpus": false,
+        "source_attendue": "KB-MAT-05",
+        "sources_retrouvees": [
+          "KB-MAT-02",
+          "KB-MAT-05",
+          "KB-SEC-03",
+          "KB-NET-11",
+          "KB-LOG-05",
+          "KB-IMP-06",
+          "KB-ACC-07",
+          "KB-PRO-04"
+        ],
+        "sources_citees": [
+          "KB-MAT-05"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-19",
+        "question": "Mes impressions sortent avec des bandes claires et du texte pâle.",
+        "hors_corpus": false,
+        "source_attendue": "KB-IMP-06",
+        "sources_retrouvees": [
+          "KB-IMP-01",
+          "KB-IMP-06",
+          "KB-NET-11",
+          "KB-LOG-12",
+          "KB-SEC-01",
+          "KB-ACC-07",
+          "KB-MAT-02",
+          "KB-SEC-03"
+        ],
+        "sources_citees": [
+          "KB-IMP-06"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-20",
+        "question": "Je ne reçois plus aucun nouveau message dans mon logiciel de courrier.",
+        "hors_corpus": false,
+        "source_attendue": "KB-LOG-12",
+        "sources_retrouvees": [
+          "KB-PRO-09",
+          "KB-LOG-12",
+          "KB-IMP-03",
+          "KB-ACC-07",
+          "KB-SEC-01",
+          "KB-MAT-02",
+          "KB-AUTH-03",
+          "KB-NET-11"
+        ],
+        "sources_citees": [
+          "KB-LOG-12"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-21",
+        "question": "Un collègue quitte l'entreprise vendredi, que faire de ses accès ?",
+        "hors_corpus": false,
+        "source_attendue": "KB-ACC-07",
+        "sources_retrouvees": [
+          "KB-ACC-07",
+          "KB-SEC-05",
+          "KB-ACC-02",
+          "KB-AUTH-02",
+          "KB-PRO-09",
+          "KB-NET-09",
+          "KB-PRO-04",
+          "KB-ACC-04"
+        ],
+        "sources_citees": [
+          "KB-ACC-07"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-22",
+        "question": "Un fichier client a été envoyé par erreur à une adresse externe.",
+        "hors_corpus": false,
+        "source_attendue": "KB-SEC-05",
+        "sources_retrouvees": [
+          "KB-LOG-12",
+          "KB-NET-04",
+          "KB-AUTH-02",
+          "KB-ACC-07",
+          "KB-SEC-03",
+          "KB-NET-07",
+          "KB-IMP-03",
+          "KB-SEC-01"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": false,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-23",
+        "question": "Comment préparer un nouveau poste avant de le donner à un arrivant ?",
+        "hors_corpus": false,
+        "source_attendue": "KB-PRO-09",
+        "sources_retrouvees": [
+          "KB-PRO-04",
+          "KB-MAT-02",
+          "KB-PRO-09",
+          "KB-SEC-01",
+          "KB-PRO-09",
+          "KB-AUTH-02",
+          "KB-SEC-03",
+          "KB-PRO-01"
+        ],
+        "sources_citees": [
+          "KB-PRO-09"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-24",
+        "question": "Faut-il sauvegarder la clé de récupération du chiffrement avant de remettre un poste ?",
+        "hors_corpus": false,
+        "source_attendue": "KB-PRO-09",
+        "sources_retrouvees": [
+          "KB-PRO-09",
+          "KB-MAT-02",
+          "KB-PRO-04",
+          "KB-SEC-03",
+          "KB-ACC-07",
+          "KB-LOG-08",
+          "KB-AUTH-02",
+          "KB-PRO-09"
+        ],
+        "sources_citees": [
+          "KB-PRO-09"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-25",
+        "question": "Mon écran ne s'allume pas.",
+        "hors_corpus": false,
+        "source_attendue": "KB-MAT-05",
+        "sources_retrouvees": [
+          "KB-MAT-05",
+          "KB-MAT-02",
+          "KB-ACC-07",
+          "KB-ACC-02",
+          "KB-IMP-01",
+          "KB-PRO-09",
+          "KB-AUTH-02",
+          "KB-NET-09"
+        ],
+        "sources_citees": [
+          "KB-MAT-02",
+          "KB-MAT-05"
+        ],
+        "incertain": true,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "RQ-26",
+        "question": "jarrive pas a me conecter mon conte est bloqé",
+        "hors_corpus": false,
+        "source_attendue": "KB-AUTH-02",
+        "sources_retrouvees": [
+          "KB-AUTH-02",
+          "KB-SEC-05",
+          "KB-IMP-01",
+          "KB-PRO-09",
+          "KB-PRO-04",
+          "KB-LOG-08",
+          "KB-SEC-01",
+          "KB-ACC-07"
+        ],
+        "sources_citees": [
+          "KB-AUTH-02"
+        ],
+        "incertain": false,
+        "rappel_ok": true,
+        "citations_fondees": true,
+        "rejet_ok": null
+      },
+      {
+        "id": "HC-01",
+        "question": "Comment configurer un routeur BGP entre deux systèmes autonomes ?",
+        "hors_corpus": true,
+        "source_attendue": null,
+        "sources_retrouvees": [
+          "KB-IMP-03",
+          "KB-NET-07",
+          "KB-LOG-12",
+          "KB-PRO-09",
+          "KB-AUTH-03",
+          "KB-MAT-02",
+          "KB-AUTH-01",
+          "KB-NET-04"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": null,
+        "citations_fondees": true,
+        "rejet_ok": true
+      },
+      {
+        "id": "HC-02",
+        "question": "Quelle est la politique de remboursement des frais de déplacement ?",
+        "hors_corpus": true,
+        "source_attendue": null,
+        "sources_retrouvees": [
+          "KB-NET-09",
+          "KB-SEC-05",
+          "KB-ACC-02",
+          "KB-IMP-01",
+          "KB-IMP-06",
+          "KB-PRO-04",
+          "KB-SEC-03",
+          "KB-AUTH-02"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": null,
+        "citations_fondees": true,
+        "rejet_ok": true
+      },
+      {
+        "id": "HC-03",
+        "question": "Comment migrer la base de données Oracle vers PostgreSQL ?",
+        "hors_corpus": true,
+        "source_attendue": null,
+        "sources_retrouvees": [
+          "KB-PRO-09",
+          "KB-AUTH-02",
+          "KB-SEC-05",
+          "KB-PRO-04",
+          "KB-ACC-07",
+          "KB-PRO-09",
+          "KB-IMP-01",
+          "KB-LOG-08"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": null,
+        "citations_fondees": true,
+        "rejet_ok": true
+      },
+      {
+        "id": "HC-04",
+        "question": "Quel est le code PIN par défaut des téléphones de service ?",
+        "hors_corpus": true,
+        "source_attendue": null,
+        "sources_retrouvees": [
+          "KB-AUTH-03",
+          "KB-NET-11",
+          "KB-NET-04",
+          "KB-IMP-03",
+          "KB-AUTH-01",
+          "KB-LOG-12",
+          "KB-PRO-09",
+          "KB-NET-09"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": null,
+        "citations_fondees": true,
+        "rejet_ok": true
+      },
+      {
+        "id": "HC-05",
+        "question": "Combien de jours de congés me reste-t-il cette année ?",
+        "hors_corpus": true,
+        "source_attendue": null,
+        "sources_retrouvees": [
+          "KB-ACC-07",
+          "KB-MAT-02",
+          "KB-PRO-09",
+          "KB-NET-09",
+          "KB-AUTH-02",
+          "KB-NET-04",
+          "KB-SEC-03",
+          "KB-PRO-04"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": null,
+        "citations_fondees": true,
+        "rejet_ok": true
+      },
+      {
+        "id": "HC-06",
+        "question": "Quelle est la procédure pour restaurer une sauvegarde de serveur ?",
+        "hors_corpus": true,
+        "source_attendue": null,
+        "sources_retrouvees": [
+          "KB-IMP-06",
+          "KB-NET-09",
+          "KB-PRO-09",
+          "KB-ACC-02",
+          "KB-PRO-09",
+          "KB-IMP-01",
+          "KB-AUTH-01",
+          "KB-PRO-01"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": null,
+        "citations_fondees": true,
+        "rejet_ok": true
+      },
+      {
+        "id": "HC-07",
+        "question": "Quel est le mot de passe administrateur des copieurs du 3e étage ?",
+        "hors_corpus": true,
+        "source_attendue": null,
+        "sources_retrouvees": [
+          "KB-ACC-07",
+          "KB-SEC-05",
+          "KB-NET-07",
+          "KB-AUTH-01",
+          "KB-PRO-09",
+          "KB-PRO-01",
+          "KB-ACC-04",
+          "KB-AUTH-02"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": null,
+        "citations_fondees": true,
+        "rejet_ok": true
+      },
+      {
+        "id": "HC-08",
+        "question": "Combien de temps faut-il conserver les journaux d'authentification ?",
+        "hors_corpus": true,
+        "source_attendue": null,
+        "sources_retrouvees": [
+          "KB-ACC-07",
+          "KB-AUTH-03",
+          "KB-AUTH-02",
+          "KB-SEC-03",
+          "KB-LOG-05",
+          "KB-PRO-09",
+          "KB-ACC-04",
+          "KB-SEC-05"
+        ],
+        "sources_citees": [],
+        "incertain": true,
+        "rappel_ok": null,
+        "citations_fondees": true,
+        "rejet_ok": true
+      }
+    ]
+  }
+}

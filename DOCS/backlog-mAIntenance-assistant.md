@@ -265,11 +265,12 @@ doivent passer leurs entrées par `masquer_objet()` avant écriture.
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| EVAL-1 | Construire `eval_dataset.json` (15-20 tickets, 8 catégories + cas difficiles) | 40 min | — |
-| EVAL-2 **[MAJ]** | Implémenter `evaluer_classification()` — recall **et précision** par catégorie (matrice de confusion simple), pas l'accuracy seule : une sur-classification vers la catégorie dominante doit rester visible | 30 min | EVAL-1, CLASS-2 |
+| ~~EVAL-1~~ ✅ | `tests/eval_dataset.json` — 20 tickets, 8 catégories, pièges de frontière | 40 min | — |
+| ~~EVAL-2~~ ✅ **[MAJ]** | `evaluer_classification()` — recall **et précision** par catégorie (matrice de confusion simple) dans `tests/eval.py` | 30 min | EVAL-1 ✅, CLASS-2 ✅ |
+| ~~RAG-9~~ ✅ *(apparenté)* | `evaluer_rag()` — rappel@k, précision citations, détection hors-corpus, dans le même `tests/eval.py` | 25 min | RAG-8 ✅ |
 | EVAL-3 | Implémenter `evaluer_scenarios_obligatoires()` | 20 min | ORCH-5 |
-| EVAL-4 | Exécuter toutes les évaluations et consigner les résultats (`tests/run_eval.py` → `tests/eval_results.json`, le livrable "résultats de l'évaluation") | 20 min | EVAL-2, EVAL-3, RAG-9 |
-| EVAL-5 | Analyse des erreurs et limites (rédaction courte) | 25 min | EVAL-4 |
+| ~~EVAL-4~~ ✅ | `tests/eval.py` (`__main__`, pas un fichier `run_eval.py` séparé) exécute classification + RAG et écrit `tests/eval_results.json` via `sauvegarder()` — c'est le livrable "résultats de l'évaluation". **Committé pour la première fois** : le fichier était généré en local puis recopié à la main dans le README, mais `.gitignore` l'excluait du dépôt — corrigé. | 20 min | EVAL-2 ✅, RAG-9 ✅ (EVAL-3 sur scénarios obligatoires reste séparé, bloqué sur ORCH-5) |
+| ~~EVAL-5~~ ✅ | Analyse des erreurs et limites — section "Résultats de classification"/"Résultats du RAG" (échecs détaillés) + "Limites connues" du README | 25 min | EVAL-4 ✅ |
 
 ## 📄 Livrables et documentation
 
