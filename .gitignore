@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+logs/*.jsonl
+chroma_db/
+tests/eval_results.json
