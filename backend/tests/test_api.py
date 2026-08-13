@@ -81,6 +81,7 @@ def _logs_isoles(tmp_path, monkeypatch):
     `set_log_llm_call`, `orchestrator.set_log_trace`) : sans cette isolation,
     chaque test ici écrirait dans le vrai `logs/` du dépôt."""
     monkeypatch.setattr(config, "dossier_logs", tmp_path)
+    monkeypatch.setattr(config, "dossier_chroma", tmp_path / "chroma")
 
 
 @pytest.fixture
@@ -97,8 +98,73 @@ def test_health(client):
     assert reponse.status_code == 200
     corps = reponse.json()
     assert corps["status"] == "ok"
-    assert "donnees" in corps
     assert "cle_llm_configuree" in corps
+
+    donnees = corps["donnees"]
+    assert "utilisateurs" in donnees
+    assert "equipements" in donnees
+    assert "services" in donnees
+    assert "incidents_actifs" in donnees
+    assert "articles_kb" in donnees
+
+    # Les fichiers de données réels sont présents dans backend/data/ :
+    # on vérifie que le lifespan les charge bien (non nul).
+    assert donnees["utilisateurs"] > 0, "utilisateurs.json non chargé"
+    assert donnees["equipements"] > 0, "equipements.json non chargé"
+    assert donnees["services"] > 0, "services.json non chargé"
+    assert donnees["articles_kb"] > 0, "kb.json non chargé"
+
+
+def test_health_diagnostic_global(client):
+    reponse = client.get("/health/diagnostic")
+    assert reponse.status_code == 200
+    assert "test=gemini" in reponse.json()["message"]
+
+
+def test_health_diagnostic_data(client):
+    reponse = client.get("/health/diagnostic", params={"test": "data"})
+    assert reponse.status_code == 200
+    corps = reponse.json()
+    assert corps["status"] == "ok"
+    assert "fichiers" in corps
+    assert "kb.json" in corps["fichiers"]
+
+
+def test_health_diagnostic_gemini_success(client, monkeypatch):
+    from src import llm_client
+    monkeypatch.setattr(llm_client, "llm_call", lambda *args, **kwargs: "OK")
+    reponse = client.get("/health/diagnostic", params={"test": "gemini"})
+    assert reponse.status_code == 200
+    assert reponse.json()["status"] == "ok"
+
+
+def test_health_diagnostic_gemini_error(client, monkeypatch):
+    from src import llm_client
+    def raising_llm_call(*args, **kwargs):
+        raise ValueError("API Key invalid")
+    monkeypatch.setattr(llm_client, "llm_call", raising_llm_call)
+    reponse = client.get("/health/diagnostic", params={"test": "gemini"})
+    assert reponse.status_code == 200
+    assert reponse.json()["status"] == "error"
+
+
+def test_health_diagnostic_chromadb_success(client, monkeypatch):
+    from src import rag
+    monkeypatch.setattr(rag, "nombre_de_fragments", lambda: 42)
+    reponse = client.get("/health/diagnostic", params={"test": "chromadb"})
+    assert reponse.status_code == 200
+    assert reponse.json()["status"] == "ok"
+    assert reponse.json()["fragments"] == 42
+
+
+def test_health_diagnostic_chromadb_error(client, monkeypatch):
+    from src import rag
+    def raising_nombre_de_fragments():
+        raise RuntimeError("ChromaDB connection refused")
+    monkeypatch.setattr(rag, "nombre_de_fragments", raising_nombre_de_fragments)
+    reponse = client.get("/health/diagnostic", params={"test": "chromadb"})
+    assert reponse.status_code == 200
+    assert reponse.json()["status"] == "error"
 
 
 def test_traiter_retourne_enveloppe_avec_trace_id(client):

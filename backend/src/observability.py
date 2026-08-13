@@ -62,6 +62,46 @@ def _lire_dernieres_lignes(fichier: Path, limite: int) -> list[dict[str, Any]]:
 # --- Traces (OBS-1, OBS-4) ------------------------------------------------
 
 
+def _enregistrer_ticket_historique(description: str | None, decision: Any, latence_ms: float) -> None:
+    if not description:
+        return
+    try:
+        fichier_hist = config.dossier_data / "tickets_historique.json"
+        tickets = []
+        if fichier_hist.exists():
+            try:
+                with open(fichier_hist, encoding="utf-8") as f:
+                    tickets = json.load(f)
+            except Exception:
+                tickets = []
+
+        next_num = len(tickets) + 1
+        new_id = f"TK-HIST-{next_num:03d}"
+
+        if hasattr(decision, "model_dump"):
+            d_dict = decision.model_dump()
+        elif isinstance(decision, dict):
+            d_dict = decision
+        else:
+            d_dict = {}
+
+        nouveau = {
+            "id": new_id,
+            "description": description,
+            "categorie": d_dict.get("categorie", "autre"),
+            "priorite": d_dict.get("priorite", "moyenne"),
+            "resolution": d_dict.get("resume", "Ticket traité par l'assistant."),
+            "duree_resolution_min": max(1, round(latence_ms / 1000)),
+        }
+
+        tickets.append(nouveau)
+        fichier_hist.parent.mkdir(parents=True, exist_ok=True)
+        with open(fichier_hist, "w", encoding="utf-8") as f:
+            json.dump(tickets, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
 def log_trace(
     trace_id: str,
     ticket: Any,
@@ -70,24 +110,13 @@ def log_trace(
     decision: Any,
     latence_ms: float,
 ) -> None:
-    """Journalise le traitement complet d'un ticket : une ligne par appel à
-    `POST /tickets/traiter`, décision finale incluse.
-
-    Signature imposée par `orchestrator.set_log_trace()` (OBS-2) — pas celle,
-    plus simple, d'origine (`description`/`decision: dict`/`erreur`) : cette
-    dernière ne correspondait à aucun appelant réel une fois l'orchestrateur
-    écrit, `ticket`/`classification`/`decision` y sont des objets Pydantic, pas
-    des dicts déjà aplatis. `ticket`/`classification` restent `None`-safe
-    (`getattr`) : l'orchestrateur appelle ce hook même quand les garde-fous ou
-    la classification ont court-circuité le pipeline avant que ces objets
-    n'existent.
-    """
+    desc = getattr(ticket, "description", None)
     _ecrire_jsonl(
         config.fichier_traces,
         {
             "horodatage": _horodatage(),
             "trace_id": trace_id,
-            "description": getattr(ticket, "description", None),
+            "description": desc,
             "categorie_classifiee": getattr(classification, "categorie", None),
             "priorite_classifiee": getattr(classification, "priorite", None),
             "confiance_classification": getattr(classification, "confiance", None),
@@ -96,6 +125,7 @@ def log_trace(
             "latence_ms": round(latence_ms, 1),
         },
     )
+    _enregistrer_ticket_historique(desc, decision, latence_ms)
 
 
 def lire_dernieres_traces(limite: int = 50) -> list[dict[str, Any]]:

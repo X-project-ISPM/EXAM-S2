@@ -50,6 +50,19 @@ async def lifespan(app: FastAPI):
     set_log_appel(log_tool_call)
     set_log_llm_call(log_llm_call)
     set_log_trace(log_trace)
+
+    # Ingestion automatique du corpus RAG s'il est vide au démarrage
+    import logging
+    logger = logging.getLogger("src.api")
+    try:
+        from src.rag import ingerer, nombre_de_fragments
+        if nombre_de_fragments() == 0 and app.state.donnees.kb:
+            logger.info("ChromaDB est vide, ingestion automatique de la KB...")
+            ingerer(app.state.donnees.kb, reinitialiser=True)
+            logger.info(f"Ingestion réussie : {nombre_de_fragments()} fragments indexés.")
+    except Exception as e:
+        logger.exception("Échec de l'ingestion automatique de la KB au démarrage")
+
     yield
 
 
@@ -136,3 +149,58 @@ def health():
             "articles_kb": len(donnees.kb) if donnees else 0,
         },
     }
+
+
+@app.get("/health/diagnostic")
+def health_diagnostic(test: str | None = None):
+    """Effectue des tests diagnostics ciblés (Gemini, ChromaDB, Données) (ORCH-4).
+
+    Permet au frontend d'identifier précisément quel composant échoue ou crash
+    (notamment le crash OOM de ChromaDB/SentenceTransformers sur Render).
+    """
+    if test == "gemini":
+        try:
+            from src.llm_client import llm_call
+            reponse = llm_call(
+                prompt_systeme="Tu es un système de diagnostic. Réponds uniquement par 'OK'.",
+                prompt_utilisateur="test",
+                etape="diagnostic",
+            )
+            valide = "ok" in str(reponse).lower()
+            return {"status": "ok" if valide else "error", "details": str(reponse)}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    elif test == "chromadb":
+        try:
+            from src.rag import nombre_de_fragments
+            nb = nombre_de_fragments()
+            return {"status": "ok", "fragments": nb}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    elif test == "data":
+        dossier = config.dossier_data
+        resultats = {}
+        fichiers = [
+            "utilisateurs.json",
+            "equipements.json",
+            "incidents_actifs.json",
+            "kb.json",
+            "tickets_historique.json",
+            "services.json",
+        ]
+        for fichier in fichiers:
+            chemin = dossier / fichier
+            resultats[fichier] = {
+                "existe": chemin.exists(),
+                "taille_bytes": chemin.stat().st_size if chemin.exists() else 0,
+            }
+        return {"status": "ok", "fichiers": resultats}
+
+    else:
+        return {
+            "status": "ok",
+            "message": "Spécifiez ?test=gemini, ?test=chromadb ou ?test=data pour lancer un test.",
+        }
+

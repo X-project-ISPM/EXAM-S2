@@ -99,17 +99,25 @@ def chunker(
 @functools.lru_cache(maxsize=1)
 def _collection():
     client = chromadb.PersistentClient(path=str(config.dossier_chroma))
-    fonction_embedding = embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name=config.rag_modele_embedding
-    )
-    return client.get_or_create_collection(
-        name=config.rag_collection,
-        embedding_function=fonction_embedding,
-        # Sans ce paramètre, ChromaDB indexe en L2 au carré : les distances
-        # seraient sur une autre échelle que le seuil de pertinence, et le
-        # filtrage deviendrait silencieusement faux.
-        metadata={"hnsw:space": "cosine"},
-    )
+    fonction_embedding = embedding_functions.ONNXMiniLM_L6_V2()
+    try:
+        return client.get_or_create_collection(
+            name=config.rag_collection,
+            embedding_function=fonction_embedding,
+            metadata={"hnsw:space": "cosine"},
+        )
+    except ValueError as e:
+        if "conflict" in str(e).lower() or "already exists" in str(e).lower():
+            try:
+                client.delete_collection(name=config.rag_collection)
+            except Exception:
+                pass
+            return client.create_collection(
+                name=config.rag_collection,
+                embedding_function=fonction_embedding,
+                metadata={"hnsw:space": "cosine"},
+            )
+        raise
 
 
 def charger_kb(chemin=None) -> list[ArticleKB]:
