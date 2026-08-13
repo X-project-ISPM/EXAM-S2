@@ -76,15 +76,51 @@ Décisions prises pendant l'implémentation :
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| RAG-1 | Installer et configurer ChromaDB + fonction d'embeddings | 20 min | SETUP-1 |
-| RAG-2 | Écrire la fonction de chunking du corpus | 30 min | — |
-| RAG-3 | Ingérer le corpus fourni dans l'index vectoriel | 30 min | RAG-1, RAG-2 |
-| RAG-4 | Implémenter `retrieve_context()` avec filtrage par catégorie et seuil de pertinence | 30 min | RAG-3 |
-| RAG-5 | Écrire le prompt de génération avec citations obligatoires | 25 min | SETUP-4 |
-| RAG-6 | Implémenter la détection "pas de source suffisante" (flag `incertain`) | 20 min | RAG-4, RAG-5 |
-| RAG-7 | Calibrer le seuil de pertinence sur des exemples manuels | 20 min | RAG-4 |
-| RAG-8 | Construire le jeu de test RAG (`eval_rag.json`) avec sources attendues | 30 min | RAG-3 |
-| RAG-9 | Implémenter `evaluer_rag()` (recall@k, précision citations) | 25 min | RAG-8 |
+| ~~RAG-1~~ ✅ | ChromaDB persistant + embeddings, **en espace cosinus explicite** | 20 min | SETUP-1 |
+| ~~RAG-2~~ ✅ | Chunking respectant les frontières de phrase, avec chevauchement | 30 min | — |
+| ~~RAG-3~~ ✅ | Ingestion (corpus d'amorçage : 15 articles → 15 fragments) | 30 min | RAG-1, RAG-2 |
+| ~~RAG-4~~ ✅ | `retrieve_context()` — catégorie en orientation, jamais en filtre dur | 30 min | RAG-3 |
+| ~~RAG-5~~ ✅ | Prompt de génération avec citations obligatoires | 25 min | SETUP-4 |
+| ~~RAG-6~~ ✅ | Drapeau `incertain` + contrôle déterministe des sources citées | 20 min | RAG-4, RAG-5 |
+| ~~RAG-7~~ ✅ | Seuil calibré par balayage mesuré (`tests/calibrer_seuil.py`) | 20 min | RAG-4 |
+| ~~RAG-8~~ ✅ | `eval_rag.json` : 15 questions couvertes + 5 hors corpus | 30 min | RAG-3 |
+| ~~RAG-9~~ ✅ | `evaluer_rag()` — rappel@k, précision des citations, rejet hors-corpus | 25 min | RAG-8 |
+
+**Résultats mesurés** (24 articles, 34 questions dont 8 hors corpus) : rappel@k **96 %**,
+précision des citations **100 %**, détection « pas de source » **100 %**.
+
+**Revue de code — 3 défauts trouvés et corrigés :**
+1. *Chevauchement dégénéré* : avec un chevauchement supérieur à la taille du fragment,
+   chaque fragment repartait presque du début du précédent — taille croissant sans fin et
+   contenu dupliqué **×4,8** dans l'index. Le chevauchement est désormais borné à la
+   moitié de la taille du fragment.
+2. *Ingestion non idempotente* : `add` laissait silencieusement l'ancienne version d'un
+   article réindexé. Or les articles portent une date de mise à jour et sont censés
+   évoluer en cours de journée. Remplacé par `upsert`.
+3. *Filtre dur par catégorie* : rendait la bonne procédure inatteignable quand la
+   classification se trompait. La catégorie oriente désormais la recherche au lieu de la
+   restreindre.
+
+**Optimisations** : appels `count()` redondants supprimés (3 → 1 par recherche) ;
+plafond de fragments par source pour qu'un article long ne monopolise pas le top-k ;
+`k` porté de 4 à 8 sur mesure (rappel 92 % → 96 %, stagne au-delà).
+
+**Quatre découvertes qui ont changé la conception :**
+1. *ChromaDB indexe en **L2 au carré**, pas en cosinus* (vérifié : distance 2.0 pour des
+   vecteurs orthogonaux, pas 1.0). Le seuil « 0.35 cosinus » du document d'architecture
+   se serait appliqué à une échelle double. La collection est créée en `hnsw:space:
+   cosine` explicitement.
+2. *Le seuil de 0.35 donnait **0 % de rappel***. Les bonnes sources sont à une distance
+   de 0.36 à 0.59 : le RAG aurait répondu « aucune source » à absolument tout.
+3. *Aucun seuil ne peut séparer le hors-corpus.* Sur le corpus élargi les plages se
+   chevauchent nettement : la meilleure correspondance d'une question hors corpus
+   descend à 0.49, sous plusieurs bonnes réponses — **marge de séparation négative**
+   (−0.10). Le garde-fou porteur est donc le drapeau `incertain` de la génération,
+   mesuré à 100 % de détection, y compris sur trois pièges conçus pour provoquer une
+   recombinaison de sources partielles.
+4. *Le modèle multilingue n'apporte rien ici* : même rappel sur le pipeline réel, mais
+   marge de séparation deux fois plus mauvaise (−0.38) et deux fois plus de couches.
+   Hypothèse de départ invalidée par la mesure, malgré un corpus francophone.
 
 ## 🤖 Agent + outils
 
