@@ -10,11 +10,23 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-RACINE = Path(__file__).resolve().parent.parent.parent
+# config.py vit dans backend/src/ : deux .parent remontent à backend/, où
+# vivent data/, logs/ et chroma_db/ depuis la restructuration pour le
+# déploiement. Un troisième .parent remonterait à la racine du dépôt, qui ne
+# contient plus ces dossiers (bug introduit par la restructuration, corrigé
+# ici — cassait toute lecture de data/kb.json, donc l'ingestion RAG).
+RACINE = Path(__file__).resolve().parent.parent
 
 
 class Config(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Chemin absolu, pas ".env" : un env_file relatif se résout par rapport au
+    # cwd du process au démarrage, pas à l'emplacement de ce fichier. Puisque
+    # src.api doit maintenant être lancé depuis backend/ (pour que `src` soit
+    # importable — cf. RACINE ci-dessus), un ".env" relatif chercherait
+    # backend/.env, qui n'existe pas : .env reste à la racine du dépôt, à
+    # côté de frontend/. Sans absolu, la clé Gemini ne charge jamais et l'app
+    # échoue au premier appel LLM (confirmé en réel après la restructuration).
+    model_config = SettingsConfigDict(env_file=str(RACINE.parent / ".env"), extra="ignore")
 
     # --- LLM (Google AI Studio) ---
     gemini_api_key: str = ""
