@@ -150,5 +150,149 @@
     "priorite": "moyenne",
     "resolution": "Demande de précisions envoyée à l'utilisateur, ticket resté sans réponse.",
     "duree_resolution_min": null
+  },
+  {
+    "id": "TK-HIST-020",
+    "description": "mon écran est noir",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-021",
+    "description": "x",
+    "categorie": "materiel",
+    "priorite": "basse",
+    "resolution": "r",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-022",
+    "description": "premier",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-023",
+    "description": "second",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-024",
+    "description": "troisieme",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-025",
+    "description": "x",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-026",
+    "description": "mon mot de passe est Ete2024!",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-027",
+    "description": "mon écran est noir",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-028",
+    "description": "x",
+    "categorie": "materiel",
+    "priorite": "basse",
+    "resolution": "r",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-029",
+    "description": "premier",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-030",
+    "description": "second",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-031",
+    "description": "troisieme",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-032",
+    "description": "x",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-033",
+    "description": "x",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-034",
+    "description": "x",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-035",
+    "description": "x",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-036",
+    "description": "x",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
+  },
+  {
+    "id": "TK-HIST-037",
+    "description": "mon mot de passe est Ete2024!",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Ticket traité par l'assistant.",
+    "duree_resolution_min": 1
   }
 ]
