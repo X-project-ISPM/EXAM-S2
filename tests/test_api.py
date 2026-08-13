@@ -4,11 +4,20 @@ Ils garantissent que le contrat exposé au frontend reste stable pendant que
 l'orchestrateur réel (ORCH-1) remplace progressivement le stub.
 """
 
+import pytest
 from fastapi.testclient import TestClient
 
 from src.api import app
+from src.config import config
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def _logs_isoles(tmp_path, monkeypatch):
+    """Les traces écrites par le stub (OBS-1) ne doivent pas polluer logs/
+    ni fuiter d'un test à l'autre."""
+    monkeypatch.setattr(config, "dossier_logs", tmp_path)
 
 
 def test_health():
@@ -54,3 +63,22 @@ def test_accents_preserves():
         "/tickets/traiter", json={"description": "Problème d'accès à l'imprimante"}
     ).json()
     assert "Problème d'accès" in corps["decision"]["resume"]
+
+
+def test_traiter_ecrit_une_trace_lisible_par_observabilite():
+    """OBS-1/OBS-4 : même le stub doit produire une trace exploitable, pour
+    que l'onglet Observabilité du frontend (FE-6) ait des données avant ORCH-1."""
+    trace_id = client.post("/tickets/traiter", json={"description": "Test OBS"}).json()["trace_id"]
+
+    traces = client.get("/observabilite/traces").json()
+    assert any(t["trace_id"] == trace_id for t in traces)
+
+
+def test_observabilite_traces_vide_sans_ticket_traite():
+    assert client.get("/observabilite/traces").json() == []
+
+
+def test_observabilite_traces_respecte_la_limite():
+    for i in range(3):
+        client.post("/tickets/traiter", json={"description": f"ticket {i}"})
+    assert len(client.get("/observabilite/traces", params={"limite": 2}).json()) == 2

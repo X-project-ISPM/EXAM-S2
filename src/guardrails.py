@@ -308,8 +308,15 @@ _EMAIL = re.compile(r"\b([A-Za-z0-9._%+-])[A-Za-z0-9._%+-]*(@[A-Za-z0-9.-]+\.[A-
 
 # Clés de dictionnaire dont la valeur est masquée quelle qu'elle soit : utile
 # pour les paramètres d'outils et les corps de requêtes loggés (OBS-1/OBS-6).
+# `token(?!s_)`/`jeton(?!s_)` : sans cette exception, « tokens_entree » et
+# « tokens_sortie » (compteurs numériques de OBS-6, pas des secrets) étaient
+# masqués eux aussi — « token » y apparaît en sous-chaîne. Pas de `\b` en
+# remplacement : ça laisserait passer un vrai secret sous une clé composée
+# comme « user_token » ou « old_password » (le soulignement n'est pas une
+# frontière de mot pour `\b`).
 _CLE_SECRETE = re.compile(
-    r"(mot_?de_?passe|mdp|password|passwd|pwd|token|jeton|secret|api[_-]?key|cl[ée]_?api)",
+    r"(mot_?de_?passe|mdp|password|passwd|pwd|token(?!s_)|jeton(?!s_)|secret|"
+    r"api[_-]?key|cl[ée]_?api)",
     re.IGNORECASE,
 )
 

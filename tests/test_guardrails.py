@@ -256,6 +256,22 @@ def test_masquage_en_profondeur_des_structures():
     assert masque["latence_ms"] == 120  # les non-chaînes traversent intactes
 
 
+def test_compteurs_de_tokens_ne_sont_pas_masques():
+    """tokens_entree/tokens_sortie (OBS-6) sont des compteurs numériques, pas
+    des secrets — mais "token" y apparaît en sous-chaîne. Régression : ils
+    étaient masqués en ***, rendant illisible tout coût/latence loggé."""
+    masque = masquer_objet({"tokens_entree": 120, "tokens_sortie": 30})
+    assert masque == {"tokens_entree": 120, "tokens_sortie": 30}
+
+
+def test_une_cle_token_composee_reste_masquee():
+    """La levée du faux positif sur tokens_entree/tokens_sortie ne doit pas
+    laisser passer un vrai secret sous une clé composée."""
+    masque = masquer_objet({"user_token": "eyJhbGciOiJIUzI1NiJ9", "api_token": "sk-abc123"})
+    assert masque["user_token"] == "***"
+    assert masque["api_token"] == "***"
+
+
 # --- Scénario 4 obligatoire, avec le vrai LLM (SEC-6) ------------------------
 # Marqué `reseau` : 5 appels réels, à lancer avec `pytest -m reseau`.
 
