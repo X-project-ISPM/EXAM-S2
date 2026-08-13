@@ -180,7 +180,7 @@ plafond de fragments par source pour qu'un article long ne monopolise pas le top
 | ~~SEC-2~~ ✅ | `OUTILS_SENSIBLES` et `est_sensible()` — dans `tools.py`, réexportés par `guardrails.py` | 15 min | AGT-1 |
 | ~~SEC-3~~ ✅ | `escalade_immediate()` — `TicketDecision` valide, aucun outil appelé, aucune procédure générée | 20 min | SEC-1, OUT-1 |
 | ~~SEC-4~~ ✅ | `verifier_intention_malveillante_llm()` fusionnée dans `check_injection()` (OU logique) | 30 min | SEC-1, SETUP-4 |
-| SEC-5 ⏳ | `masquer_donnees_sensibles()` / `masquer_objet()` écrits et testés dans `guardrails.py` ; **reste à brancher** dans OBS-1 et OBS-6, qui n'existent pas encore | 15 min | OBS-1, OBS-6 |
+| ~~SEC-5~~ ✅ | `masquer_donnees_sensibles()` / `masquer_objet()` dans `guardrails.py`, branchés dans `observability._ecrire_jsonl()` (OBS-1/OBS-6 : `traces.jsonl`, `tool_calls.jsonl`, `llm_calls.jsonl` passent tous par ce point unique) | 15 min | OBS-1 ✅, OBS-6 ✅ |
 | ~~SEC-6~~ ✅ | Scénario 4 testé avec 3 formulations qui contournent les mots-clés + 2 tickets légitimes en contrôle inverse (`pytest -m reseau`) | 25 min | SEC-3, SEC-4, AGT-6 |
 
 **Résultats mesurés** (`pytest tests/test_guardrails.py`, 53 tests hors réseau + 5 réels
@@ -248,8 +248,8 @@ limité à l'anglais : `Système : Windows 11` est un en-tête de ticket ordinai
 route vers le support de niveau 1 — soit la mauvaise équipe pour une tentative de
 manipulation.
 
-**Reste à faire (hors périmètre du bloc)** : OBS-1/OBS-6 doivent passer leurs entrées par
-`masquer_objet()` avant écriture — c'est le dernier branchement manquant de SEC-5.
+**SEC-5 complet** : OBS-1/OBS-6 passent bien leurs entrées par `masquer_objet()` avant
+écriture (`observability._ecrire_jsonl()`, un seul point d'écriture pour les 3 journaux).
 L'appel à `check_injection()` / `escalade_immediate()` avant la classification est en
 place depuis ORCH-1 (`src/orchestrator.py`).
 
@@ -258,17 +258,19 @@ place depuis ORCH-1 (`src/orchestrator.py`).
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
 | ~~OBS-1~~ ✅ | `log_trace()` et `log_tool_call()` (écriture JSONL), + lecteurs `lire_dernieres_traces()`/`lire_derniers_appels_outils()` | 30 min | OUT-1 |
-| OBS-2 | Brancher les logs à chaque étape de l'orchestrateur | 20 min | OBS-1 ✅, ORCH-1 |
+| ~~OBS-2~~ ✅ | `orchestrator.set_log_trace()` branché dans le `lifespan` de `api.py`, aux côtés de `set_log_appel`/`set_log_llm_call` — les 3 hooks OBS-1/2/6 s'activent au démarrage réel de l'API | 20 min | OBS-1 ✅, ORCH-1 ✅ |
 | ~~OBS-3~~ ✅ | `estimer_cout()` (approximatif, tarifs configurables) | 20 min | OBS-1 |
 | ~~OBS-4~~ ✅ | Endpoint `GET /observabilite/traces` — branché sur le stub SETUP-5 dès maintenant, données réelles pour FE-6 sans attendre ORCH-1 | 15 min | OBS-1 |
-| OBS-5 | Décomposer la latence par étape (classification/RAG/agent) dans chaque trace | 20 min | OBS-2 |
+| OBS-5 | Décomposer la latence par étape (classification/RAG/agent) dans chaque trace | 20 min | OBS-2 ✅ |
 | ~~OBS-6~~ ✅ **[NOUVEAU]** | `log_llm_call()` (écrit dans `logs/llm_calls.jsonl`), branché dans `llm_call()`/`llm_call_with_tools()` via un hook (`set_log_llm_call`, même pattern que `tools.set_log_appel` — import direct impossible, cycle via `guardrails.py`) | 25 min | OBS-1 ✅, SETUP-4 |
 
-**Résultats mesurés** : suite complète 204 tests, `ruff` clean. Testé en réel avec un serveur uvicorn (pas juste `TestClient`) : `POST /tickets/traiter` puis `GET /observabilite/traces` retournent bien la trace écrite sur disque, secrets masqués (`Ete2024!` → `***`) dans la description et la décision imbriquée.
+**Résultats mesurés** : suite complète 244 tests, `ruff` clean. Testé en réel avec un serveur uvicorn (pas juste `TestClient`) : `POST /tickets/traiter` puis `GET /observabilite/traces` retournent bien la trace écrite sur disque, secrets masqués (`Ete2024!` → `***`) dans la description et la décision imbriquée.
 
 **Bug trouvé et corrigé en cours de route (dans `guardrails.py`, hors périmètre OBS)** : `masquer_objet()` masquait `tokens_entree`/`tokens_sortie` (compteurs numériques d'OBS-6) parce que « token » y apparaît en sous-chaîne. Un `\b` autour du motif aurait aussi empêché de masquer des clés composées légitimes comme `user_token` (le soulignement n'est pas une frontière de mot). Fix ciblé : `token(?!s_)` — exclut seulement la forme plurielle suivie d'un underscore, sans affaiblir la détection ailleurs. Tests de régression ajoutés dans `test_guardrails.py`.
 
-**Portée non couverte ici (attend ORCH-1)** : OBS-2 et OBS-5 nécessitent que l'orchestrateur réel existe pour propager `trace_id`/latences par étape jusqu'à `llm_call()`. `log_llm_call()` accepte déjà `etape`/`trace_id` en paramètres optionnels — aucun appelant existant (classification, diagnostic, RAG, agent, garde-fous) n'a besoin d'être modifié quand ORCH-1 les branchera.
+**OBS-2, complété après coup** : le merge de l'orchestrateur (ORCH-1) avait fait disparaître les imports d'observabilité et le branchement des hooks dans `api.py` — `orchestrator.py` définissait de son côté son propre hook `set_log_trace()`, avec une signature différente de celle écrite initialement pour `log_trace()` (deux modules développés en parallèle, contrats jamais confrontés). `log_trace()` a été adapté à la signature réellement utilisée par l'orchestrateur, et les 3 hooks sont maintenant branchés dans le `lifespan`.
+
+**OBS-5 reste ouvert** : décomposer la latence par étape suppose de propager `trace_id`/`etape` jusqu'à `classify_ticket()`, `extraire_diagnostic()` et `retrieve_context()`, qui ne les acceptent pas encore (seul l'appel LLM de l'agent transmet `trace_id` aujourd'hui). Explicitement sacrifiable (confort de démo, pas un point de contrôle noté).
 
 ## 🔗 Orchestrateur (intégration backend)
 
