@@ -90,7 +90,7 @@ def _monkeypatcher(monkeypatch, reponses):
     l'historique des messages reçus pour vérification."""
     recus = []
 
-    def faux_appel(messages, prompt_systeme, tools, response_schema=None):
+    def faux_appel(messages, prompt_systeme, tools, response_schema=None, **kwargs):
         recus.append((messages, prompt_systeme, tools, response_schema))
         return reponses.pop(0)
 

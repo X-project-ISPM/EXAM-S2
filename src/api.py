@@ -22,10 +22,17 @@ from src.agent import (
     rejeter_action_en_attente,
 )
 from src.config import config
+from src.llm_client import set_log_llm_call
 from src.models import charger_toutes_les_donnees
-from src.orchestrator import traiter_ticket
+from src.observability import (
+    lire_dernieres_traces,
+    log_llm_call,
+    log_tool_call,
+    log_trace,
+)
+from src.orchestrator import set_log_trace, traiter_ticket
 from src.schemas import TicketInput, TicketReponse, ValidationInput, ValidationReponse
-from src.tools import initialiser_donnees
+from src.tools import initialiser_donnees, set_log_appel
 
 
 @asynccontextmanager
@@ -36,6 +43,13 @@ async def lifespan(app: FastAPI):
     # fichiers absents, l'API démarre donc même avec un `data/` incomplet.
     app.state.donnees = charger_toutes_les_donnees()
     initialiser_donnees(app.state.donnees)
+    # OBS-1/OBS-2/OBS-6 : brancher les trois loggers une fois au démarrage.
+    # Hooks plutôt qu'imports directs dans tools.py/llm_client.py/
+    # orchestrator.py — observability.py importe guardrails.py, qui importe
+    # déjà llm_client.py (cycle si l'import était direct).
+    set_log_appel(log_tool_call)
+    set_log_llm_call(log_llm_call)
+    set_log_trace(log_trace)
     yield
 
 
