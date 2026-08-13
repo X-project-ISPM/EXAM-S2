@@ -37,5 +37,8 @@ select = ["E", "F", "I", "UP", "B"]
 testpaths = ["tests"]
 # Les tests touchant le réseau (quota Gemini limité) sont désactivés par
 # défaut : `pytest -m reseau` pour les lancer explicitement.
-markers = ["reseau: test effectuant un appel réel à l'API Gemini"]
+markers = [
+    "reseau: test effectuant un appel réel à l'API Gemini",
+    "index: test nécessitant le modèle d'embedding et un index Chroma (lent)",
+]
 addopts = "-m 'not reseau'"

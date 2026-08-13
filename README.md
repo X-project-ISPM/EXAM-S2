@@ -62,8 +62,7 @@ Le détail complet — prompts, modèles de données, stratégie d'évaluation �
 | [src/models.py](src/models.py) | Données métier (utilisateurs, équipements, KB) + chargement |
 | [src/llm_client.py](src/llm_client.py) | Point d'appel unique vers Gemini, avec reprise sur quota |
 | [src/classifier.py](src/classifier.py) | Classification catégorie / priorité + routage équipe |
-| [src/tools.py](src/tools.py) | Spécification et implémentation des 8 outils + exécution validée |
-| [src/agent.py](src/agent.py) | Boucle agent (function calling, limite d'itérations, validation humaine) |
+| [src/rag.py](src/rag.py) | Découpage, index Chroma, recherche et génération citée |
 | [src/api.py](src/api.py) | Endpoints FastAPI |
 | [frontend/app.py](frontend/app.py) | Interface de démonstration Streamlit |
 | [tests/](tests/) | Tests + jeux de données d'évaluation |
@@ -121,29 +120,62 @@ causes identifiées, est significatif.
 Le seul échec restant (EV-12, une habilitation manquante sur une application) oppose
 deux lectures défendables du barème — il est conservé comme tel plutôt que réétiqueté.
 
+### Résultats du RAG
+
+Corpus de 24 articles (26 fragments) et 34 questions, dont 8 volontairement hors du
+corpus. Les questions couvrent les paraphrases, les fautes d'orthographe, les requêtes
+très courtes, les procédures voisines à départager et un article long découpé en
+plusieurs fragments.
+
+| Métrique | Résultat |
+|---|---|
+| Rappel@k (bonne source retrouvée) | **96 %** (25/26) |
+| Précision des citations | **100 %** — aucune source inventée |
+| Détection « pas de source » | **100 %** (8/8 signalées incertaines, aucune source citée) |
+
+L'unique échec de rappel (RQ-22, « un fichier client a été envoyé par erreur à une
+adresse externe » → article sur les fuites de données) n'a aucun recouvrement lexical
+avec sa source : il demande une inférence que l'embedding seul ne fait pas. Point
+important, **il a échoué proprement** — le système a signalé son incertitude et n'a cité
+aucune source, plutôt que de répondre à partir d'un article hors sujet. Une recherche
+hybride (lexicale + vectorielle) est la piste identifiée pour ce type de cas.
+
+Les huit questions hors corpus incluent trois pièges conçus pour tenter la
+recombinaison : une procédure de restauration inexistante alors que le corpus mentionne
+les sauvegardes, un mot de passe d'imprimante lexicalement très proche de deux articles
+réels, et une durée de conservation qu'on pourrait fabriquer en croisant deux articles
+partiels. Toutes ont été refusées.
+
 Détail complet dans `tests/eval_results.json` (généré).
 
-### Résultats de Agents + Outils
+### Comment le seuil de pertinence a été fixé
 
-La boucle agent est testée avec un LLM simulé : ce qu'on vérifie hors-ligne, ce sont
-les mécanismes que le **code contrôle** (le modèle, lui, ne peut pas être évalué sans
-quota). 48 tests couvrent la spécification, l'implémentation des 8 outils et la
-mécanique de la boucle :
+`tests/calibrer_seuil.py` balaie les valeurs candidates sans consommer de quota LLM
+(embeddings locaux uniquement). Trois enseignements ont orienté la conception :
 
-| Mécanisme vérifié | Résultat |
-|---|---|
-| Spécification conforme au §3.4 | 8/8 outils aux noms exacts du sujet, 4 consultations + 4 actions |
-| Sensibilité des actions (§6) | `mettre_a_jour_ticket` et `escalader_vers_technicien` bloqués côté code, **0 exécution non approuvée** (vérifié : le registre est intact après une tentative) |
-| Validation des paramètres (§5.2) | appels incomplets ou outils inconnus refusés avant exécution |
-| Erreurs d'appel (§5.2) | toute exception interne (ticket inexistant…) capturée et renvoyée au modèle — jamais d'exception vers l'utilisateur |
-| Contrôle du nombre d'actions (§5.2) | boucle bornée à 5 itérations ; limite atteinte → escalade propre, pas d'erreur nue |
-| Validation humaine (§5.2/§6) | action sensible mise en attente ; exécution possible **uniquement** après approbation (chemin `/tickets/valider`) |
-| Sortie structurée (§5.3) | réponse finale contrainte au schéma `TicketDecision` côté serveur + revalidée Pydantic ; sortie non conforme → erreur typée, dégradée par l'orchestrateur |
-| Couverture | 30 tests outils + 9 tests agent, 1 test réseau (`-m reseau`) pour l'appel réel |
+- **ChromaDB indexe en L2 au carré par défaut, pas en cosinus.** La collection est donc
+  créée explicitement en espace cosinus ; sans cela le seuil s'appliquerait à une échelle
+  double et filtrerait silencieusement de travers.
+- **Un seuil serré casse le rappel.** Les bonnes sources se situent entre 0.36 et 0.60 :
+  la valeur de 0.35 initialement envisagée donnait 0 % de rappel.
+- **Aucun seuil ne sépare le hors-corpus.** Sur le corpus élargi, les plages se
+  chevauchent franchement : la meilleure correspondance d'une question hors corpus
+  descend à 0.49, sous plusieurs bonnes réponses. La marge de séparation est donc
+  **négative** (−0.10). Le seuil est volontairement large (0.75, simple filet contre les
+  rapprochements absurdes) et c'est le drapeau `incertain` produit à la génération qui
+  porte la décision — mesuré à 100 % de détection, y compris sur les pièges conçus pour
+  provoquer une recombinaison.
+- **Le modèle multilingue n'apporte rien ici.** Comparé sur le pipeline réel, il obtient
+  le même rappel (92 % avant l'ajustement de `k`) avec une marge de séparation nettement
+  plus mauvaise (−0.38 contre −0.10) et deux fois plus de couches. Le modèle anglais
+  `all-MiniLM-L6-v2` est conservé sur cette base, malgré un corpus francophone.
+- **`k` a été mesuré, pas supposé** : le rappel passe de 92 % (k=4 ou 6) à 96 % (k=8) et
+  stagne ensuite. La détection hors-corpus reste à 100 % malgré les passages
+  supplémentaires.
 
-Limite mesurée : la mécanique est validée hors-ligne, mais le choix effectif des outils
-par le modèle ne peut se juger qu'en appel réel — c'est l'objet du test réseau, à
-exécuter une fois la clé configurée, et de la démo.
+Deux garde-fous indépendants protègent contre la « procédure inexistante » (§6) :
+le modèle déclare lui-même son incertitude, et un contrôle déterministe retire toute
+source citée qui ne figurait pas dans les passages fournis.
 
 ## Limites connues
 
@@ -158,10 +190,13 @@ exécuter une fois la clé configurée, et de la démo.
 - Le jeu d'évaluation est **rédigé à la main** : il reflète notre compréhension du
   barème, pas les données réelles du hackathon. Les priorités attendues comportent des
   cas légitimement discutables (EV-12 en est un).
-- L'agent est **testé avec un LLM simulé** (mécanique de boucle, blocage des actions
-  sensibles, limite d'itérations) ; le test réseau réel (`-m reseau`) reste à valider
-  en début de journée.
-- Diagnostic, RAG et orchestration de l'API ne sont pas encore branchés au pipeline.
+- **Le corpus de `data/kb.json` est un corpus d'amorçage rédigé par nos soins**, destiné
+  à être remplacé par celui fourni le jour du hackathon. Les 100 % du RAG sont donc
+  obtenus sur un corpus et des questions écrits par la même équipe : ils valident la
+  chaîne technique, pas la difficulté réelle. Le seuil est à recalibrer
+  (`python -m tests.calibrer_seuil`) dès le corpus réel disponible.
+- Diagnostic, RAG et agent ne sont pas branchés : la décision retournée par l'API reste
+  un stub.
 - Les données du hackathon ne sont pas encore dans `data/` ; le chargeur tolère leur
   absence pour ne pas bloquer le démarrage, mais les noms de fichiers attendus
   ([src/models.py](src/models.py)) devront être alignés sur ceux réellement fournis, de

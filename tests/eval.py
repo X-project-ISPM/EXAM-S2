@@ -97,6 +97,101 @@ def evaluer_classification(chemin: Path = JEU_PAR_DEFAUT) -> dict:
     }
 
 
+def evaluer_rag(chemin: Path = RACINE / "eval_rag.json") -> dict:
+    """Mesure les trois exigences du §5.1 : retrouver le bon document, citer
+    des sources réellement utilisées, et signaler l'absence de source."""
+    from src.rag import (
+        charger_kb,
+        generer_reponse_rag,
+        ingerer,
+        nombre_de_fragments,
+        retrieve_context,
+    )
+
+    if nombre_de_fragments() == 0:
+        ingerer(charger_kb())
+
+    with open(chemin, encoding="utf-8") as f:
+        jeu = json.load(f)
+
+    details = []
+    for question in jeu:
+        fragments = retrieve_context(question["question"], categorie=question.get("categorie"))
+        sources_retrouvees = [f["source_id"] for f in fragments]
+        reponse = generer_reponse_rag(question["question"], fragments)
+
+        hors_corpus = bool(question.get("hors_corpus"))
+        attendue = question.get("source_attendue")
+
+        details.append(
+            {
+                "id": question["id"],
+                "question": question["question"],
+                "hors_corpus": hors_corpus,
+                "source_attendue": attendue,
+                "sources_retrouvees": sources_retrouvees,
+                "sources_citees": reponse.sources,
+                "incertain": reponse.incertain,
+                # Le bon document figure-t-il parmi les passages retenus ?
+                "rappel_ok": (attendue in sources_retrouvees) if attendue else None,
+                # Toute source citée provient-elle bien des passages fournis ?
+                "citations_fondees": set(reponse.sources) <= set(sources_retrouvees),
+                # Hors corpus : le système doit refuser d'affirmer.
+                "rejet_ok": (reponse.incertain or not sources_retrouvees) if hors_corpus else None,
+            }
+        )
+
+    couvertes = [d for d in details if not d["hors_corpus"]]
+    hors = [d for d in details if d["hors_corpus"]]
+    avec_citations = [d for d in couvertes if d["sources_citees"]]
+
+    return {
+        "total": len(details),
+        "questions_couvertes": len(couvertes),
+        "questions_hors_corpus": len(hors),
+        "rappel_at_k": round(sum(d["rappel_ok"] for d in couvertes) / len(couvertes), 3),
+        "precision_citations": (
+            round(sum(d["citations_fondees"] for d in avec_citations) / len(avec_citations), 3)
+            if avec_citations
+            else None
+        ),
+        "detection_hors_corpus": round(sum(d["rejet_ok"] for d in hors) / len(hors), 3),
+        "reponses_certaines_couvertes": round(
+            sum(not d["incertain"] for d in couvertes) / len(couvertes), 3
+        ),
+        "echecs": [
+            d
+            for d in details
+            if (d["rappel_ok"] is False) or (d["rejet_ok"] is False) or not d["citations_fondees"]
+        ],
+        "details": details,
+    }
+
+
+def afficher_rag(rapport: dict) -> None:
+    print(f"\n{'=' * 62}")
+    print(f"RAG — {rapport['total']} questions "
+          f"({rapport['questions_couvertes']} couvertes, "
+          f"{rapport['questions_hors_corpus']} hors corpus)")
+    print(f"{'=' * 62}")
+    print(f"Rappel@k (bonne source retrouvée)   : {rapport['rappel_at_k']:.0%}")
+    precision = rapport["precision_citations"]
+    print(f"Précision des citations             : "
+          f"{precision:.0%}" if precision is not None else "n/a")
+    print(f"Détection « pas de source »         : {rapport['detection_hors_corpus']:.0%}")
+    print(f"Réponses assumées (couvertes)       : {rapport['reponses_certaines_couvertes']:.0%}")
+
+    if rapport["echecs"]:
+        print(f"\nÉCHECS ({len(rapport['echecs'])})")
+        print("-" * 62)
+        for e in rapport["echecs"]:
+            print(f"\n[{e['id']}] {e['question'][:66]}")
+            print(f"  attendu {e['source_attendue']} / retrouvé {e['sources_retrouvees']}")
+            print(f"  citées {e['sources_citees']} | incertain={e['incertain']}")
+    else:
+        print("\nAucun échec.")
+
+
 def afficher(rapport: dict) -> None:
     print(f"\n{'=' * 62}")
     print(f"CLASSIFICATION — {rapport['total']} tickets")
@@ -146,7 +241,9 @@ def sauvegarder(rapport: dict, chemin: Path = RACINE / "eval_results.json") -> P
     charge_utile = {
         "date": datetime.now(UTC).isoformat(),
         "modele": config.gemini_model,
-        "classification": rapport,
+        "modele_embedding": config.rag_modele_embedding,
+        "seuil_rag": config.rag_seuil_pertinence,
+        **rapport,
     }
     with open(chemin, "w", encoding="utf-8") as f:
         json.dump(charge_utile, f, ensure_ascii=False, indent=2)
@@ -154,6 +251,11 @@ def sauvegarder(rapport: dict, chemin: Path = RACINE / "eval_results.json") -> P
 
 
 if __name__ == "__main__":
-    rapport = evaluer_classification()
-    afficher(rapport)
-    print(f"\nRapport écrit dans {sauvegarder(rapport)}")
+    classification = evaluer_classification()
+    afficher(classification)
+
+    rag = evaluer_rag()
+    afficher_rag(rag)
+
+    chemin = sauvegarder({"classification": classification, "rag": rag})
+    print(f"\nRapport écrit dans {chemin}")

@@ -34,10 +34,32 @@ class Config(BaseSettings):
     llm_requetes_par_minute: int = 14  # marge sous la limite Free Tier de 15
 
     # --- RAG ---
-    rag_seuil_pertinence: float = 0.35  # distance cosinus, à calibrer (RAG-7)
-    rag_k: int = 4
-    rag_taille_chunk: int = 400
-    rag_chevauchement: int = 50
+    # ATTENTION : ChromaDB utilise L2 au carré par défaut, pas le cosinus. La
+    # collection est créée explicitement en espace cosinus (voir rag.py) —
+    # sans cela, ce seuil s'appliquerait à une échelle deux fois plus grande.
+    # Seuil volontairement large (RAG-7, voir tests/calibrer_seuil.py).
+    # Le calibrage isole une frontière nette sur le jeu de test — bonnes
+    # sources jusqu'à 0.59, hors-corpus à partir de 0.61 — mais cette marge de
+    # 0.016 ne survit pas à un changement de formulation : une requête courte
+    # (« j'ai oublié mon mot de passe ») place sa bonne source à 0.63, donc
+    # au-delà. Un seuil serré rejetterait ces requêtes légitimes.
+    # Mesure comparative à 0.75 : rappel, précision des citations ET détection
+    # hors-corpus restent à 100 %, le modèle jugeant lui-même les passages
+    # insuffisants. Le garde-fou robuste est donc le drapeau `incertain` de la
+    # génération ; ce seuil ne sert plus que de filet contre les
+    # rapprochements absurdes.
+    rag_seuil_pertinence: float = 0.75
+    # Mesuré sur le corpus élargi : le rappel passe de 92 % (k=4 et k=6) à
+    # 96 % (k=8), et stagne au-delà. Le surcoût en contexte est acceptable
+    # puisque le modèle écarte de façon fiable les passages hors sujet.
+    rag_k: int = 8
+    rag_taille_chunk: int = 220  # en mots
+    rag_chevauchement: int = 40
+    # Empêche un article long de monopoliser le top-k avec ses propres
+    # fragments, au détriment d'une seconde procédure pertinente.
+    rag_max_fragments_par_source: int = 2
+    rag_modele_embedding: str = "sentence-transformers/all-MiniLM-L6-v2"
+    rag_collection: str = "base-de-connaissances"
 
     # --- Agent ---
     agent_max_iterations: int = 5  # §5.2 du sujet : contrôle du nombre d'actions
