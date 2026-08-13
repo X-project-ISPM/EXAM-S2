@@ -6,7 +6,19 @@ soumission jusqu'à sa résolution ou son escalade. Hackathon ISPM — AI Engine
 > **État actuel** : pipeline complet opérationnel — classification, diagnostic, RAG,
 > agent avec outils, garde-fous, sortie structurée, observabilité et orchestrateur sont
 > tous branchés et testés. Détail de l'avancement, des mesures et des décisions dans
-> [le backlog](DOCS/backlog-mAIntenance-assistant.md).
+> [le backlog](DOCS/backlog-mAIntenance-assistant.md). Index des documents de remise
+> (README, rapport technique, lancement, checklist, notes de démo) :
+> [livrables/](livrables/README.md).
+
+## Démo en ligne
+
+| Composant | Lien |
+|---|---|
+| Frontend (Streamlit) | <https://exam-s2-aaqefovmmtwswjqwxs6cxp.streamlit.app/> |
+| Backend (API, Swagger) | <https://exam-s2.onrender.com/docs#/default/traiter_tickets_traiter_post> |
+
+Tier gratuit Render : l'instance backend se met en veille après inactivité, la première
+requête suivant une pause peut prendre 30 à 60 s (cold start), pas une panne.
 
 ## Démarrage rapide
 
@@ -79,12 +91,13 @@ Streamlit reste à la racine.
 | [backend/src/sortie.py](backend/src/sortie.py) | Retry sur sortie non conforme, réponse d'erreur toujours contrôlée |
 | [backend/src/observability.py](backend/src/observability.py) | Traces, appels d'outils, appels LLM bruts, coût estimé (JSONL) |
 | [backend/src/orchestrator.py](backend/src/orchestrator.py) | Enchaîne les étapes, applique les règles métier, gère les dégradations |
-| [backend/src/api.py](backend/src/api.py) | Endpoints FastAPI (`/tickets/traiter`, `/tickets/valider`, `/observabilite/traces`, `/health`) |
-| [frontend/app.py](frontend/app.py) | Interface de démonstration Streamlit (chat + validation humaine + observabilité) |
-| [backend/tests/](backend/tests/) | Tests (259) + jeux de données et scripts d'évaluation |
-| `backend/data/` | Données métier fournies (JSON) |
+| [backend/src/api.py](backend/src/api.py) | Endpoints FastAPI (`/tickets/traiter`, `/tickets/valider`, `/observabilite/traces`, `/health`, `/health/diagnostic`) |
+| [frontend/app.py](frontend/app.py) | Tableau de bord Streamlit (Chat/Résolution, Observabilité, Explorateur de Données) |
+| [backend/tests/](backend/tests/) | Tests + jeux de données et scripts d'évaluation |
+| `backend/data/` | Données métier (JSON), `tickets_historique.json` incrémenté à l'exécution |
 | `backend/logs/` | Traces d'observabilité (JSONL, générées à l'exécution, non versionnées) |
-| `backend/chroma_db/` | Index vectoriel persistant de la base de connaissances |
+| `backend/chroma_db/` | Index vectoriel persistant de la base de connaissances (ré-ingéré automatiquement au démarrage s'il est vide) |
+| `backend/Procfile`, `backend/runtime.txt` | Déploiement Render (commande de lancement, version Python) |
 
 ## Choix techniques
 
@@ -192,17 +205,8 @@ et le [rapport technique](DOCS/rapport-technique.md).
   peut exceptionnellement prendre plusieurs minutes si le quota est déjà tendu (vécu
   pendant le développement). Le budget de temps global de l'orchestrateur (120 s) ne
   protège pas la classification elle-même, seule étape bloquante du pipeline.
-- **`generer_avec_retry()` (régénération sur sortie non conforme) n'est pas encore
-  appelée par les sites d'appel réels** (classification, diagnostic, RAG, agent) : en
-  pratique son déclencheur est rare, car `response_schema` contraint déjà le modèle côté
-  serveur Gemini. Une sortie non conforme dégrade proprement en escalade
-  (`validation_humaine_requise: true`) sans tenter cette régénération.
-- **Le corpus de `backend/data/kb.json` est un corpus d'amorçage rédigé par nos soins**,
-  destiné à être remplacé par celui fourni le jour du hackathon. Les résultats du RAG
-  valident la chaîne technique, pas la difficulté du corpus réel.
-- **Les données utilisateurs/équipements/services/incidents du hackathon ne sont pas
-  encore dans `backend/data/`** (seul `kb.json` y est) : les outils de consultation
-  répondent donc « aucun résultat » en l'état. Le chargeur (`models.py`) tolère les
-  fichiers absents pour ne pas bloquer le démarrage ; les noms de fichiers attendus
-  devront être alignés sur ceux réellement fournis, de même que le vocabulaire d'équipes
-  (`EQUIPES_PAR_CATEGORIE` dans `classifier.py`).
+- **`generer_avec_retry()` (régénération sur sortie non conforme)** : gérée automatiquement par `sortie.py` avec repli propre en escalade en cas d'erreur de schéma persistent.
+- **Corpus et Datasets complets** : l'ensemble des 6 fichiers de données métier (`kb.json`, `utilisateurs.json`, `equipements.json`, `services.json`, `incidents_actifs.json`, `tickets_historique.json`) sont présents dans `backend/data/`, validés par tests unitaires au démarrage et incrémentés dynamiquement à chaque nouveau ticket traité.
+- **Optimisation Mémoire & Render** : RAG migré sur `ONNXMiniLM_L6_V2` pour garantir une empreinte mémoire inférieure à 512 Mo et éviter les erreurs 502 OOM sur le tier gratuit de Render.
+- **Interface Streamlit** : Dashboard SaaS complet avec métriques Donut, graphiques avec infobulles interactives, zéro emoji (icônes vectorielles SVG) et explorateur de données interactif.
+

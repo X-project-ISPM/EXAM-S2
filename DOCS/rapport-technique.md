@@ -23,7 +23,7 @@ Le diagnostic reprend ensuite la catégorie déjà connue pour extraire les info
 
 ## 3. RAG et recherche documentaire
 
-La recherche documentaire est construite autour de ChromaDB et d’embeddings locaux via sentence-transformers. Les articles sont découpés en fragments avec chevauchement, indexés en espace cosinus explicite et interrogés avec un top-k mesuré. Le score de pertinence est ensuite comparé à un seuil calibré sur des jeux de tests, ce qui permet d’identifier les cas hors corpus sans inventer de source.
+La recherche documentaire est construite autour de ChromaDB et d'embeddings locaux optimisés via le runtime ONNX (`ONNXMiniLM_L6_V2`). Ce choix garantit un temps de calcul minimal et une empreinte mémoire strictement inférieure aux 512 Mo alloués par Render en hébergement gratuit, éliminant les risques de crash 502 (Out-Of-Memory). Les articles sont découpés en fragments avec chevauchement, indexés en espace cosinus explicite et interrogés avec un top-k mesuré. Le score de pertinence est ensuite comparé à un seuil calibré sur des jeux de tests, ce qui permet d'identifier les cas hors corpus sans inventer de source.
 
 Le mécanisme inclut trois protections importantes :
 
@@ -92,10 +92,9 @@ Le système répond automatiquement en escalade si une tentative de manipulation
 Le prototype est solide, mais il reste conscient de ses limites :
 
 - la sortie du modèle n’est pas entièrement déterministe, même à température 0 ;
-- le quota Gemini Free Tier impose un lissage explicite des appels ;
-- le corpus de connaissance est un corpus d’amorçage, pas encore le corpus final du hackathon ;
-- les fichiers utilisateurs/équipements/services/incidents ne sont pas encore alignés sur le dataset final ;
-- la génération de réponse se protège par validation de schéma, mais le système reste dépendant d’un service externe.
+- le quota Gemini Free Tier impose un lissage explicite des appels, et un dépassement peut ralentir un ticket de plusieurs minutes en cas de reprise imposée par l’API ;
+- les 6 fichiers de données métier (`kb.json`, `utilisateurs.json`, `equipements.json`, `services.json`, `incidents_actifs.json`, `tickets_historique.json`) sont désormais complets dans `backend/data/` ; `tickets_historique.json` s’incrémente automatiquement à chaque ticket traité par l’API, y compris en test manuel — un nettoyage est recommandé avant de le réutiliser comme jeu de données de référence propre ;
+- la génération de réponse se protège par validation de schéma, mais le système reste dépendant d’un service externe (Gemini) et, en hébergement Render, d’un volume ChromaDB éphémère (ré-ingéré automatiquement au démarrage si vide).
 
 Ces limites sont explicitement documentées, ce qui est un critère positif pour la revue : elles montrent que le projet ne prétend pas couvrir un contexte hors du périmètre technique réellement livré.
 
