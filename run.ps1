@@ -9,13 +9,19 @@ if (-not (Test-Path ".env")) {
     exit 1
 }
 
-$python = ".venv\Scripts\python.exe"
+$racine = $PSScriptRoot
+$python = Join-Path $racine ".venv\Scripts\python.exe"
 if (-not (Test-Path $python)) { $python = "python" }
 
-$api = Start-Process -FilePath $python -ArgumentList "-m","uvicorn","src.api:app","--port","8000" -PassThru -NoNewWindow
+# `src` n'est importable que depuis backend/ (restructuration pour le
+# déploiement) : lancer depuis la racine échoue en ModuleNotFoundError.
+# -WorkingDirectory ne change que le cwd du process enfant, pas celui de ce
+# script (donc les chemins ci-dessous restent résolus depuis $racine).
+$api = Start-Process -FilePath $python -ArgumentList "-m","uvicorn","src.api:app","--port","8000" `
+    -WorkingDirectory (Join-Path $racine "backend") -PassThru -NoNewWindow
 try {
     Start-Sleep -Seconds 2
-    & $python -m streamlit run frontend/app.py --server.port 8501
+    & $python -m streamlit run (Join-Path $racine "frontend\app.py") --server.port 8501
 }
 finally {
     if ($api -and -not $api.HasExited) { Stop-Process -Id $api.Id -Force }

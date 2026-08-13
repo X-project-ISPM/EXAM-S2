@@ -10,7 +10,7 @@ __pycache__/
 .ruff_cache/
 
 # Artefacts d'exécution (les logs sont un livrable, mais générés : voir README)
-logs/*.jsonl
-logs/*.log
-logs/*.pid
-chroma_db/
+backend/logs/*.jsonl
+backend/logs/*.log
+backend/logs/*.pid
+backend/chroma_db/

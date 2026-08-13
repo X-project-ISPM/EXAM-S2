@@ -24,17 +24,22 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
+package-dir = {"" = "backend"}
 packages = ["src"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Sans ce réglage, ruff ne reconnaît plus `src` comme premier-parti depuis la
+# restructuration `backend/` : il fusionne son groupe d'imports avec les
+# bibliothèques tierces, et `ruff check` échoue sur tous les fichiers de test.
+src = ["backend"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["backend/tests"]
 # Les tests touchant le réseau (quota Gemini limité) sont désactivés par
 # défaut : `pytest -m reseau` pour les lancer explicitement.
 markers = [

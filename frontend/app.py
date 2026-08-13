@@ -1,9 +1,10 @@
+import os
 import requests
 import streamlit as st
 
 st.set_page_config(page_title="mAIntenance & Assistance", layout="wide")
 
-API = "http://localhost:8000"
+API = os.getenv("API_URL", "http://localhost:8000")
 
 with st.sidebar:
     st.subheader("Scénarios de démo")

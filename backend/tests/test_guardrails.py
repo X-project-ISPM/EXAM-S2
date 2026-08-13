@@ -7,7 +7,6 @@ attaques reformulées que la couche 1 laisse passer — c'est le cœur de SEC-6.
 """
 
 import pytest
-
 from src.guardrails import (
     OUTILS_SENSIBLES,
     categorie_sensible,
