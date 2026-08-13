@@ -1,0 +1,242 @@
+[
+  {
+    "id": "RQ-01",
+    "question": "J'ai oublié mon mot de passe, je n'arrive plus à ouvrir ma session.",
+    "categorie": "comptes_authentification",
+    "source_attendue": "KB-AUTH-01"
+  },
+  {
+    "id": "RQ-02",
+    "question": "Mon compte s'est bloqué après plusieurs essais de connexion.",
+    "categorie": "comptes_authentification",
+    "source_attendue": "KB-AUTH-02"
+  },
+  {
+    "id": "RQ-03",
+    "question": "Mon poste n'a plus accès au réseau depuis ce matin.",
+    "categorie": "reseau",
+    "source_attendue": "KB-NET-04"
+  },
+  {
+    "id": "RQ-04",
+    "question": "Je n'arrive pas à me connecter au VPN depuis chez moi.",
+    "categorie": "reseau",
+    "source_attendue": "KB-NET-07"
+  },
+  {
+    "id": "RQ-05",
+    "question": "Tout est très lent sur le réseau, plusieurs collègues se plaignent.",
+    "categorie": "reseau",
+    "source_attendue": "KB-NET-09"
+  },
+  {
+    "id": "RQ-06",
+    "question": "Mon ordinateur portable ne s'allume plus du tout.",
+    "categorie": "materiel",
+    "source_attendue": "KB-MAT-02"
+  },
+  {
+    "id": "RQ-07",
+    "question": "Rien ne sort de l'imprimante alors que j'ai lancé l'impression.",
+    "categorie": "imprimantes",
+    "source_attendue": "KB-IMP-01"
+  },
+  {
+    "id": "RQ-08",
+    "question": "Le copieur ne m'envoie plus mes documents numérisés par courriel.",
+    "categorie": "imprimantes",
+    "source_attendue": "KB-IMP-03"
+  },
+  {
+    "id": "RQ-09",
+    "question": "Mon tableur se ferme tout seul quand j'ouvre un fichier précis.",
+    "categorie": "logiciels",
+    "source_attendue": "KB-LOG-05"
+  },
+  {
+    "id": "RQ-10",
+    "question": "Mon poste est devenu très lent depuis la mise à jour de l'antivirus.",
+    "categorie": "logiciels",
+    "source_attendue": "KB-LOG-08"
+  },
+  {
+    "id": "RQ-11",
+    "question": "Je voudrais obtenir l'accès au dossier partagé de la comptabilité.",
+    "categorie": "droits_acces",
+    "source_attendue": "KB-ACC-02"
+  },
+  {
+    "id": "RQ-12",
+    "question": "L'application de paie affiche que je n'ai pas les droits nécessaires.",
+    "categorie": "droits_acces",
+    "source_attendue": "KB-ACC-04"
+  },
+  {
+    "id": "RQ-13",
+    "question": "J'ai reçu un courriel douteux avec une pièce jointe, que dois-je faire ?",
+    "categorie": "cybersecurite",
+    "source_attendue": "KB-SEC-01"
+  },
+  {
+    "id": "RQ-14",
+    "question": "Des fenêtres s'ouvrent toutes seules sur mon poste, je m'inquiète.",
+    "categorie": "cybersecurite",
+    "source_attendue": "KB-SEC-03"
+  },
+  {
+    "id": "RQ-15",
+    "question": "Sous quel délai un incident critique doit-il être escaladé ?",
+    "categorie": "autre",
+    "source_attendue": "KB-PRO-01"
+  },
+  {
+    "id": "RQ-16",
+    "question": "J'ai changé de téléphone et l'application d'authentification ne marche plus.",
+    "categorie": "comptes_authentification",
+    "source_attendue": "KB-AUTH-03",
+    "difficulte": "precision",
+    "note": "Trois articles parlent d'authentification : il faut viser le double facteur, pas la réinitialisation de mot de passe ni le déverrouillage."
+  },
+  {
+    "id": "RQ-17",
+    "question": "Mon wifi se coupe toutes les cinq minutes en salle de réunion.",
+    "categorie": "reseau",
+    "source_attendue": "KB-NET-11",
+    "difficulte": "precision",
+    "note": "À distinguer de KB-NET-04 (perte totale de connexion) et KB-NET-09 (lenteurs)."
+  },
+  {
+    "id": "RQ-18",
+    "question": "Mon poste est allumé, les ventilateurs tournent, mais l'écran reste noir.",
+    "categorie": "materiel",
+    "source_attendue": "KB-MAT-05",
+    "difficulte": "precision",
+    "note": "Piège : proche de KB-MAT-02 (poste qui ne démarre pas). Ici le poste démarre bien."
+  },
+  {
+    "id": "RQ-19",
+    "question": "Mes impressions sortent avec des bandes claires et du texte pâle.",
+    "categorie": "imprimantes",
+    "source_attendue": "KB-IMP-06",
+    "difficulte": "precision",
+    "note": "À distinguer de KB-IMP-01 (rien ne sort du tout)."
+  },
+  {
+    "id": "RQ-20",
+    "question": "Je ne reçois plus aucun nouveau message dans mon logiciel de courrier.",
+    "categorie": "logiciels",
+    "source_attendue": "KB-LOG-12",
+    "difficulte": "moyen"
+  },
+  {
+    "id": "RQ-21",
+    "question": "Un collègue quitte l'entreprise vendredi, que faire de ses accès ?",
+    "categorie": "droits_acces",
+    "source_attendue": "KB-ACC-07",
+    "difficulte": "moyen"
+  },
+  {
+    "id": "RQ-22",
+    "question": "Un fichier client a été envoyé par erreur à une adresse externe.",
+    "categorie": "cybersecurite",
+    "source_attendue": "KB-SEC-05",
+    "difficulte": "reformulation",
+    "note": "Le mot « fuite de données » n'apparaît pas dans la question : le rapprochement doit être sémantique."
+  },
+  {
+    "id": "RQ-23",
+    "question": "Comment préparer un nouveau poste avant de le donner à un arrivant ?",
+    "categorie": "autre",
+    "source_attendue": "KB-PRO-09",
+    "difficulte": "article_long",
+    "note": "Article découpé en plusieurs fragments : vérifie que le bon fragment remonte."
+  },
+  {
+    "id": "RQ-24",
+    "question": "Faut-il sauvegarder la clé de récupération du chiffrement avant de remettre un poste ?",
+    "categorie": "autre",
+    "source_attendue": "KB-PRO-09",
+    "difficulte": "article_long",
+    "note": "Détail situé au milieu de l'article long : teste le découpage plutôt que le titre."
+  },
+  {
+    "id": "RQ-25",
+    "question": "Mon écran ne s'allume pas.",
+    "categorie": "materiel",
+    "source_attendue": "KB-MAT-05",
+    "difficulte": "requete_courte",
+    "note": "Requête très courte : les distances sont mécaniquement plus grandes, ce qui met le seuil à l'épreuve."
+  },
+  {
+    "id": "RQ-26",
+    "question": "jarrive pas a me conecter mon conte est bloqé",
+    "categorie": "comptes_authentification",
+    "source_attendue": "KB-AUTH-02",
+    "difficulte": "fautes",
+    "note": "Fautes d'orthographe multiples, comme annoncé au §7 du sujet."
+  },
+  {
+    "id": "HC-01",
+    "question": "Comment configurer un routeur BGP entre deux systèmes autonomes ?",
+    "categorie": "reseau",
+    "source_attendue": null,
+    "hors_corpus": true,
+    "note": "Sujet réseau avancé, absent du corpus : doit être signalé incertain."
+  },
+  {
+    "id": "HC-02",
+    "question": "Quelle est la politique de remboursement des frais de déplacement ?",
+    "categorie": "autre",
+    "source_attendue": null,
+    "hors_corpus": true,
+    "note": "Hors périmètre informatique."
+  },
+  {
+    "id": "HC-03",
+    "question": "Comment migrer la base de données Oracle vers PostgreSQL ?",
+    "categorie": "logiciels",
+    "source_attendue": null,
+    "hors_corpus": true,
+    "note": "Projet technique sans procédure documentée."
+  },
+  {
+    "id": "HC-04",
+    "question": "Quel est le code PIN par défaut des téléphones de service ?",
+    "categorie": "materiel",
+    "source_attendue": null,
+    "hors_corpus": true,
+    "note": "Information non présente : le modèle ne doit surtout pas en inventer une."
+  },
+  {
+    "id": "HC-05",
+    "question": "Combien de jours de congés me reste-t-il cette année ?",
+    "categorie": "autre",
+    "source_attendue": null,
+    "hors_corpus": true,
+    "note": "Donnée personnelle hors base de connaissances."
+  },
+  {
+    "id": "HC-06",
+    "question": "Quelle est la procédure pour restaurer une sauvegarde de serveur ?",
+    "categorie": "autre",
+    "source_attendue": null,
+    "hors_corpus": true,
+    "note": "Piège : le corpus mentionne les sauvegardes en passant (KB-NET-09, KB-PRO-09) sans jamais décrire de procédure de restauration. Le modèle ne doit pas broder à partir de ces mentions."
+  },
+  {
+    "id": "HC-07",
+    "question": "Quel est le mot de passe administrateur des copieurs du 3e étage ?",
+    "categorie": "imprimantes",
+    "source_attendue": null,
+    "hors_corpus": true,
+    "note": "Piège vocabulaire : très proche lexicalement des articles imprimantes et comptes, mais l'information n'existe pas. Inventer ici serait une faute de sécurité."
+  },
+  {
+    "id": "HC-08",
+    "question": "Combien de temps faut-il conserver les journaux d'authentification ?",
+    "categorie": "cybersecurite",
+    "source_attendue": null,
+    "hors_corpus": true,
+    "note": "Piège : KB-AUTH-02 mentionne le journal d'authentification et KB-ACC-07 des durées de conservation, mais aucun ne répond à cette question. Teste la résistance à la recombinaison de deux sources partielles."
+  }
+]
