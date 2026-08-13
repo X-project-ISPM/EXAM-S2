@@ -1,0 +1,170 @@
+[
+  {
+    "id": "KB-AUTH-01",
+    "titre": "Réinitialiser un mot de passe oublié",
+    "categorie": "comptes_authentification",
+    "derniere_maj": "2026-01-15T09:00:00",
+    "contenu": "Cette procédure s'applique lorsqu'un utilisateur ne parvient plus à se connecter à sa session parce qu'il a oublié son mot de passe. Vérifier d'abord l'identité de l'utilisateur en lui demandant son matricule et le nom de son responsable hiérarchique. Ouvrir la console d'administration des comptes, rechercher l'utilisateur par son identifiant, puis choisir Réinitialiser le mot de passe. Cocher impérativement l'option obligeant l'utilisateur à changer son mot de passe à la première connexion. Communiquer le mot de passe temporaire par téléphone uniquement, jamais par courriel ni par messagerie instantanée. Demander à l'utilisateur de se connecter immédiatement pour confirmer que l'accès fonctionne. Si le compte reste inaccessible après réinitialisation, vérifier qu'il n'est pas également verrouillé et se reporter à la procédure de déverrouillage."
+  },
+  {
+    "id": "KB-AUTH-02",
+    "titre": "Déverrouiller un compte bloqué après plusieurs tentatives",
+    "categorie": "comptes_authentification",
+    "derniere_maj": "2026-01-20T14:30:00",
+    "contenu": "La politique de sécurité verrouille automatiquement un compte après cinq tentatives de connexion infructueuses consécutives. Le verrouillage dure trente minutes, ou jusqu'à intervention manuelle du support. Avant de déverrouiller, consulter le journal d'authentification pour vérifier l'origine des tentatives échouées : si elles proviennent d'une adresse ou d'un poste inhabituel, ne pas déverrouiller et transmettre immédiatement le dossier à l'équipe sécurité, car il peut s'agir d'une tentative d'intrusion. Si les tentatives proviennent bien du poste habituel de l'utilisateur, ouvrir la console d'administration, sélectionner le compte et cliquer sur Déverrouiller. Rappeler à l'utilisateur que le verrouillage se déclenche au bout de cinq essais."
+  },
+  {
+    "id": "KB-NET-04",
+    "titre": "Diagnostiquer une perte de connexion réseau sur un poste",
+    "categorie": "reseau",
+    "derniere_maj": "2026-02-02T11:00:00",
+    "contenu": "Lorsqu'un poste n'accède plus au réseau, procéder du plus simple au plus complexe. Vérifier d'abord que le câble Ethernet est correctement enfiché et que la diode de la prise réseau clignote, ou que le poste est bien associé au réseau sans fil. Exécuter ensuite ipconfig pour contrôler que le poste a bien reçu une adresse IP du serveur DHCP : une adresse commençant par 169.254 signale un échec d'attribution. Tester la connectivité vers la passerelle par un ping, puis vers un serveur externe pour distinguer un problème local d'un problème de sortie internet. Si plusieurs postes du même étage sont touchés simultanément, ne pas poursuivre le diagnostic poste par poste : il s'agit très probablement d'une panne de commutateur ou de liaison, à escalader vers l'équipe infrastructure."
+  },
+  {
+    "id": "KB-NET-07",
+    "titre": "Résoudre les problèmes de connexion au VPN",
+    "categorie": "reseau",
+    "derniere_maj": "2026-02-10T16:45:00",
+    "contenu": "Le VPN permet aux collaborateurs en télétravail d'accéder aux ressources internes. En cas d'échec de connexion, vérifier que le client VPN est à jour, car les versions antérieures à la 5.2 ne sont plus acceptées par la passerelle. Contrôler que l'utilisateur saisit bien son identifiant du domaine et non son adresse de messagerie. Vérifier que le certificat du poste n'est pas expiré. Si le client affiche une erreur d'authentification alors que le mot de passe est correct, le compte est peut-être verrouillé. Une connexion qui s'établit puis se coupe après quelques minutes indique généralement une liaison internet domestique instable plutôt qu'un problème côté entreprise. Le VPN est limité à deux cents connexions simultanées : au-delà, les nouvelles demandes sont refusées, ce qui se produit surtout en début de matinée."
+  },
+  {
+    "id": "KB-NET-09",
+    "titre": "Lenteurs réseau généralisées",
+    "categorie": "reseau",
+    "derniere_maj": "2026-01-28T08:15:00",
+    "contenu": "Une lenteur réseau ressentie par plusieurs utilisateurs doit être qualifiée avant toute intervention. Mesurer le débit réel depuis un poste filaire, puis comparer avec la valeur de référence du site. Consulter la supervision pour repérer une saturation de lien ou un équipement en surcharge. Les lenteurs constatées en fin de mois coïncident souvent avec les sauvegardes et les traitements comptables planifiés. Si la lenteur ne touche qu'une application précise, le réseau n'est probablement pas en cause et le dossier revient à l'équipe applicative. Une lenteur brutale et généralisée sur tout un site, sans opération planifiée, doit être escaladée sans délai vers l'équipe infrastructure."
+  },
+  {
+    "id": "KB-MAT-02",
+    "titre": "Poste qui ne démarre plus",
+    "categorie": "materiel",
+    "derniere_maj": "2026-01-12T10:20:00",
+    "contenu": "Face à un poste qui ne s'allume pas, distinguer l'absence totale de réaction d'un démarrage qui échoue en cours de route. Si aucune diode ne s'allume et qu'aucun ventilateur ne tourne, vérifier l'alimentation : prise murale fonctionnelle, câble correctement branché, bloc d'alimentation non commuté sur arrêt. Sur un portable, retirer l'alimentation et maintenir le bouton de démarrage enfoncé quinze secondes pour purger l'alimentation résiduelle, puis rebrancher. Si le poste s'allume mais s'arrête avant l'affichage du système, noter les éventuels signaux sonores au démarrage, qui identifient le composant défaillant. Un poste sous garantie ne doit jamais être ouvert par le support : déclarer l'incident auprès du constructeur. Prévoir un poste de prêt si l'utilisateur ne peut plus travailler."
+  },
+  {
+    "id": "KB-IMP-01",
+    "titre": "Impression impossible sur une imprimante réseau",
+    "categorie": "imprimantes",
+    "derniere_maj": "2026-02-05T13:10:00",
+    "contenu": "Lorsqu'un document ne s'imprime pas, vérifier d'abord l'état physique de l'imprimante : bourrage papier, bac vide, capot ouvert, consommable épuisé. Ces causes représentent la majorité des incidents. Contrôler ensuite la file d'attente d'impression sur le poste de l'utilisateur : un document en erreur bloque tous les suivants et doit être supprimé. Si la file reste bloquée, redémarrer le service spouleur d'impression. Vérifier que l'imprimante répond au ping depuis le poste. Si plusieurs utilisateurs sont touchés par la même imprimante, agir directement sur le serveur d'impression plutôt que poste par poste. Une imprimante absente de la liste des périphériques doit être réinstallée depuis le serveur d'impression."
+  },
+  {
+    "id": "KB-IMP-03",
+    "titre": "Numérisation vers messagerie qui ne fonctionne plus",
+    "categorie": "imprimantes",
+    "derniere_maj": "2026-02-08T09:40:00",
+    "contenu": "La fonction de numérisation vers la messagerie envoie les documents scannés directement dans la boîte de l'utilisateur. En cas d'échec, vérifier que l'adresse enregistrée dans le carnet du copieur est toujours valide, notamment après un changement de nom ou de service. Contrôler que le copieur parvient à joindre le serveur de messagerie sur le port configuré. Un document volumineux peut dépasser la taille maximale autorisée par la messagerie : proposer alors de numériser en plusieurs fois ou de réduire la résolution. Vérifier enfin que les messages ne sont pas classés automatiquement comme indésirables dans la boîte de l'utilisateur."
+  },
+  {
+    "id": "KB-LOG-05",
+    "titre": "Application bureautique qui se ferme inopinément",
+    "categorie": "logiciels",
+    "derniere_maj": "2026-01-25T15:00:00",
+    "contenu": "Une application bureautique qui se ferme seule lors de l'ouverture d'un fichier précis indique le plus souvent un fichier corrompu plutôt qu'une défaillance du logiciel. Tenter d'ouvrir le même fichier depuis un autre poste pour trancher. Utiliser la fonction de récupération intégrée à l'application. Démarrer l'application en mode sans échec afin d'écarter un module complémentaire défectueux, cause fréquente de fermetures inopinées. Vérifier que les mises à jour sont appliquées et que le poste dispose d'assez de mémoire disponible : les fichiers volumineux comportant de nombreux calculs peuvent épuiser la mémoire sur les postes anciens. En dernier recours, réparer l'installation depuis le panneau de configuration."
+  },
+  {
+    "id": "KB-LOG-08",
+    "titre": "Ralentissement du poste après une mise à jour",
+    "categorie": "logiciels",
+    "derniere_maj": "2026-02-12T10:05:00",
+    "contenu": "Un ralentissement apparu juste après une mise à jour logicielle, notamment de l'antivirus, s'explique généralement par l'analyse complète du disque déclenchée automatiquement après installation. Cette analyse peut durer plusieurs heures et mobilise fortement le processeur. Vérifier dans la console de l'antivirus si une analyse est en cours et informer l'utilisateur qu'elle se terminera d'elle-même. Il ne s'agit pas d'un incident de sécurité et le poste n'est pas infecté. Si le ralentissement persiste au-delà de vingt-quatre heures après la fin de l'analyse, examiner les processus consommateurs dans le gestionnaire des tâches et vérifier l'espace disque disponible : un disque rempli à plus de quatre-vingt-dix pour cent dégrade nettement les performances."
+  },
+  {
+    "id": "KB-ACC-02",
+    "titre": "Demander l'accès à un dossier partagé",
+    "categorie": "droits_acces",
+    "derniere_maj": "2026-01-18T11:30:00",
+    "contenu": "Toute demande d'accès à un dossier partagé doit être validée par le propriétaire des données avant d'être exécutée, quelle que soit l'urgence invoquée. Le support ne peut jamais accorder un accès de sa propre initiative. Identifier le propriétaire du partage dans le référentiel des ressources. Transmettre la demande accompagnée du nom de l'utilisateur, du partage concerné et du motif. Une fois l'accord obtenu par écrit, ajouter l'utilisateur au groupe de sécurité correspondant : ne jamais poser de droits individuels directement sur un dossier, cette pratique rendant les habilitations impossibles à auditer. L'utilisateur doit fermer puis rouvrir sa session pour que la nouvelle appartenance au groupe soit prise en compte."
+  },
+  {
+    "id": "KB-ACC-04",
+    "titre": "Message de droits insuffisants dans une application métier",
+    "categorie": "droits_acces",
+    "derniere_maj": "2026-02-01T14:00:00",
+    "contenu": "Un utilisateur correctement authentifié sur sa session mais recevant un message de droits insuffisants à l'ouverture d'une application métier ne relève pas d'un problème de compte : son authentification fonctionne, c'est son habilitation applicative qui manque. Chaque application métier dispose de son propre référentiel de rôles, indépendant de l'annuaire. Vérifier dans la console d'administration de l'application quel rôle est attribué à l'utilisateur. Un changement de poste ou de service entraîne fréquemment la perte des rôles précédents. La demande d'attribution d'un rôle doit être validée par le responsable fonctionnel de l'application. Pour les applications traitant des données sensibles, notamment la paie, une validation complémentaire du responsable des ressources humaines est exigée."
+  },
+  {
+    "id": "KB-SEC-01",
+    "titre": "Traiter un signalement de courriel suspect ou d'hameçonnage",
+    "categorie": "cybersecurite",
+    "derniere_maj": "2026-02-14T08:00:00",
+    "contenu": "Tout signalement de courriel suspect doit être traité comme un incident de sécurité et transmis à l'équipe sécurité, sans exception et sans traitement automatique. Demander à l'utilisateur de ne pas supprimer le message, qui constitue une pièce nécessaire à l'analyse. Lui demander explicitement s'il a ouvert la pièce jointe, cliqué sur un lien ou saisi ses identifiants sur une page. Si des identifiants ont été saisis, faire réinitialiser le mot de passe immédiatement et vérifier l'absence de connexion suspecte sur le compte. Si une pièce jointe a été ouverte, isoler le poste du réseau sans l'éteindre, afin de préserver les éléments d'analyse. Ne jamais transférer le courriel suspect à d'autres utilisateurs. Un courriel interne demandant de confirmer un mot de passe est toujours frauduleux : l'organisation ne demande jamais de mot de passe par messagerie."
+  },
+  {
+    "id": "KB-SEC-03",
+    "titre": "Poste suspecté d'être compromis",
+    "categorie": "cybersecurite",
+    "derniere_maj": "2026-02-14T08:30:00",
+    "contenu": "Les signes d'une compromission possible sont l'ouverture spontanée de fenêtres, l'apparition de programmes non installés par l'utilisateur, une activité réseau anormale ou des fichiers devenus illisibles. Face à ces signes, isoler immédiatement le poste du réseau en débranchant le câble ou en désactivant le sans-fil, mais ne jamais éteindre le poste : l'extinction détruit des éléments d'analyse présents en mémoire. Ne pas tenter de nettoyer le poste soi-même ni de lancer une analyse antivirus avant l'intervention de l'équipe sécurité. Faire changer les mots de passe de l'utilisateur depuis un autre poste sain. Si des fichiers sont devenus illisibles et qu'une demande de rançon s'affiche, il s'agit d'un rançongiciel : déclencher sans délai la procédure d'incident majeur et prévenir la direction."
+  },
+  {
+    "id": "KB-PRO-01",
+    "titre": "Règles d'escalade et niveaux de service",
+    "categorie": "autre",
+    "derniere_maj": "2026-01-05T09:00:00",
+    "contenu": "Un incident de priorité critique doit être escaladé dans les quinze minutes suivant sa qualification, avec information du responsable d'astreinte. Les incidents de priorité haute sont pris en charge dans l'heure, les priorités moyennes dans la demi-journée, et les priorités basses sous cinq jours ouvrés. Le support de premier niveau escalade dès qu'un incident dépasse trente minutes de traitement sans progression. Toute action touchant à la sécurité, aux habilitations ou aux comptes à privilèges nécessite une validation humaine explicite avant exécution, et ne peut jamais être réalisée automatiquement. Un incident affectant plusieurs services simultanément est requalifié en incident majeur, quelle que soit sa priorité initiale."
+  },
+  {
+    "id": "KB-AUTH-03",
+    "titre": "Configurer l'authentification à double facteur",
+    "categorie": "comptes_authentification",
+    "derniere_maj": "2026-02-18T10:00:00",
+    "contenu": "L'authentification à double facteur est obligatoire pour tous les accès distants et pour les comptes disposant de privilèges d'administration. L'utilisateur installe l'application d'authentification sur son téléphone professionnel, puis scanne le code présenté par le portail d'inscription. Douze codes de secours lui sont remis à l'issue de l'inscription : il doit les conserver hors de son poste de travail, jamais dans un fichier sur le disque. Lorsqu'un utilisateur change de téléphone, il doit désinscrire l'ancien appareil avant de mettre en service le nouveau, sans quoi le portail refusera un second enregistrement. En cas de perte du téléphone, le support désactive temporairement le double facteur après vérification de l'identité auprès du responsable hiérarchique, et l'utilisateur dispose alors de vingt-quatre heures pour réinscrire un appareil. Un décalage de l'horloge du téléphone de plus de trente secondes fait échouer la validation des codes : demander à l'utilisateur d'activer la synchronisation automatique de l'heure. Ne jamais désactiver définitivement le double facteur sur un compte à privilèges, quelle que soit l'urgence invoquée."
+  },
+  {
+    "id": "KB-NET-11",
+    "titre": "Le wifi se déconnecte de façon répétée",
+    "categorie": "reseau",
+    "derniere_maj": "2026-02-20T09:30:00",
+    "contenu": "Une déconnexion répétée du réseau sans fil se distingue d'une absence totale de connexion : le poste s'associe puis perd la borne au bout de quelques minutes. Relever d'abord la zone du bâtiment concernée et le nombre d'utilisateurs touchés, car une borne défaillante affecte tous les postes de son périmètre. Vérifier le niveau de signal reçu sur le poste : en dessous de soixante pour cent, l'utilisateur se trouve en limite de couverture et bascule sans cesse d'une borne à l'autre. Contrôler que le pilote de la carte sans fil est à jour, les versions anciennes gérant mal l'itinérance entre bornes. Désactiver la mise en veille de la carte réseau dans les options d'alimentation, cause fréquente de coupures sur les postes portables. Si les déconnexions se produisent uniquement en salle de réunion, vérifier la saturation de la borne : au-delà de trente appareils connectés simultanément, les nouvelles associations deviennent instables. Une coupure généralisée sur tout un étage relève de l'équipe infrastructure et non du traitement poste par poste."
+  },
+  {
+    "id": "KB-MAT-05",
+    "titre": "Écran noir alors que le poste est allumé",
+    "categorie": "materiel",
+    "derniere_maj": "2026-02-16T11:15:00",
+    "contenu": "Un écran noir sur un poste dont les ventilateurs tournent et dont les diodes sont allumées ne relève pas d'un problème de démarrage mais d'affichage. Vérifier que l'écran est sous tension et que son câble d'alimentation est branché, la diode de l'écran renseignant sur son état. Contrôler le câble vidéo aux deux extrémités et le remplacer par un câble connu comme fonctionnel pour écarter une rupture interne. Sur un poste équipé de plusieurs sorties vidéo, s'assurer que le câble est branché sur la carte graphique et non sur la sortie intégrée à la carte mère. Appuyer sur la combinaison de touches de bascule d'affichage si l'utilisateur travaille sur un portable relié à un écran externe : l'affichage peut avoir été renvoyé vers un écran absent. Tester l'écran sur un autre poste pour trancher entre une panne de l'écran et une panne de la sortie vidéo. Si l'écran fonctionne ailleurs et que le poste reste noir avec un câble neuf, la carte graphique est en cause et le poste part en atelier."
+  },
+  {
+    "id": "KB-IMP-06",
+    "titre": "Qualité d'impression dégradée",
+    "categorie": "imprimantes",
+    "derniere_maj": "2026-02-11T15:20:00",
+    "contenu": "Une impression qui sort pâle, striée ou tachée relève de l'entretien du matériel et non d'un défaut de configuration. Des bandes horizontales claires indiquent un niveau de toner faible : sortir la cartouche, la secouer horizontalement pour répartir la poudre restante, puis la remettre en place, ce qui permet de tenir quelques dizaines de pages avant le remplacement. Des traces verticales régulières signalent un tambour rayé, qui doit être remplacé. Des taches réparties au hasard viennent d'un excès de poudre dans le circuit et nécessitent un nettoyage par le prestataire de maintenance. Un texte flou sur toute la page peut venir d'un papier inadapté ou humide : essayer une rame neuve issue d'un emballage fermé. Lancer la page de diagnostic depuis le panneau du copieur permet de distinguer un défaut matériel d'un problème lié au document envoyé, car cette page est générée par l'imprimante elle-même sans passer par le poste."
+  },
+  {
+    "id": "KB-LOG-12",
+    "titre": "Messagerie qui ne se synchronise plus",
+    "categorie": "logiciels",
+    "derniere_maj": "2026-02-19T08:50:00",
+    "contenu": "Lorsque le client de messagerie n'affiche plus les nouveaux messages, vérifier d'abord si le problème existe aussi depuis l'accès web : si la messagerie web fonctionne, le service est opérationnel et le problème est local au poste. Contrôler que le client est bien en mode connecté et non en mode hors connexion, bascule fréquemment activée par erreur. Vérifier la taille de la boîte : au-delà du quota alloué, la réception est bloquée sans message d'erreur explicite, et l'utilisateur doit archiver ou supprimer des éléments. Un fichier de données local endommagé empêche également la synchronisation : utiliser l'outil de réparation fourni avec le client. Après un changement de mot de passe, le client conserve parfois l'ancien identifiant en cache et échoue silencieusement : supprimer les identifiants enregistrés dans le gestionnaire d'identification du poste puis relancer le client. Ne jamais supprimer le profil de messagerie sans avoir vérifié au préalable que les messages sont bien conservés côté serveur."
+  },
+  {
+    "id": "KB-ACC-07",
+    "titre": "Départ d'un collaborateur et retrait des accès",
+    "categorie": "droits_acces",
+    "derniere_maj": "2026-02-17T16:00:00",
+    "contenu": "Le retrait des accès lors du départ d'un collaborateur suit un calendrier strict déclenché par la notification des ressources humaines. Le jour du départ, le compte est désactivé et non supprimé, afin de préserver les données et les traces d'activité. Les sessions ouvertes sont fermées et le double facteur est révoqué. Les accès aux applications métier sont retirés en priorité, en commençant par celles traitant des données sensibles. La boîte de messagerie est convertie en boîte partagée accessible au responsable pendant trois mois, puis archivée. Les fichiers stockés sur l'espace personnel sont transférés au responsable hiérarchique après inventaire. Le matériel est restitué et son numéro d'inventaire remis en stock. Le compte n'est définitivement supprimé qu'au bout de douze mois. Aucune de ces opérations ne peut être engagée sur simple demande verbale : la notification écrite des ressources humaines est obligatoire, y compris en cas de départ précipité."
+  },
+  {
+    "id": "KB-SEC-05",
+    "titre": "Conduite à tenir en cas de fuite de données",
+    "categorie": "cybersecurite",
+    "derniere_maj": "2026-02-21T07:45:00",
+    "contenu": "Une fuite de données suspectée ou avérée déclenche une procédure d'incident majeur, quelle que soit l'ampleur estimée. Recueillir sans délai la nature des données concernées, leur volume approximatif, la date de découverte et le canal par lequel la fuite a été constatée. Ne jamais tenter de reprendre contact avec un éventuel destinataire externe ni de supprimer les éléments concernés : ces actions détruisent des preuves et peuvent aggraver la situation juridique. Prévenir immédiatement le responsable de la sécurité des systèmes d'information et le délégué à la protection des données, qui décident conjointement des suites. Lorsque des données personnelles sont concernées, l'organisation dispose de soixante-douze heures pour notifier l'autorité de contrôle : ce délai court à partir de la prise de connaissance de l'incident, pas de sa résolution. Le support ne communique jamais sur un incident de ce type, ni en interne ni à l'extérieur ; toute demande d'information est renvoyée vers le responsable sécurité."
+  },
+  {
+    "id": "KB-PRO-09",
+    "titre": "Guide complet de préparation et de remise d'un poste de travail",
+    "categorie": "autre",
+    "derniere_maj": "2026-02-22T09:00:00",
+    "contenu": "Ce guide décrit l'ensemble des étapes de préparation d'un poste de travail, depuis la réception du matériel jusqu'à sa remise au collaborateur. Il s'applique aux arrivées, aux renouvellements de parc et aux remplacements après panne. À la réception du matériel, contrôler la conformité de la livraison avec le bon de commande et relever le numéro de série de chaque équipement. Enregistrer immédiatement le matériel dans l'inventaire, en renseignant le modèle, la date d'acquisition et la durée de garantie. Un matériel non inventorié à ce stade devient introuvable lors des campagnes de renouvellement. Le déploiement du système se fait par l'image standard du parc, jamais par une installation manuelle : l'image garantit que les paramètres de sécurité, le chiffrement du disque et l'agent de supervision sont présents. Vérifier après déploiement que le chiffrement du disque est bien actif et que la clé de récupération est remontée dans la console centrale. Un poste dont la clé de récupération n'est pas sauvegardée ne doit jamais être remis à un utilisateur, sous peine de perte définitive des données en cas de défaillance. Rattacher ensuite le poste au domaine et vérifier que les stratégies de sécurité sont appliquées. Installer les logiciels métier correspondant au profil du collaborateur, en s'appuyant sur la fiche de poste fournie par le responsable. Les logiciels soumis à licence nominative sont installés uniquement après attribution formelle de la licence, jamais par anticipation. Procéder à la mise à jour complète du système et des applications avant la remise, afin que l'utilisateur ne subisse pas un long cycle de mises à jour à la première utilisation. Configurer l'authentification à double facteur avec le collaborateur lors de la remise, en sa présence, et lui remettre ses codes de secours. Créer son profil de messagerie et vérifier avec lui que la réception et l'envoi fonctionnent. Présenter les espaces de stockage : l'espace personnel, les partages de son service, et rappeler que les documents professionnels ne doivent jamais être stockés uniquement en local, faute de sauvegarde. Faire signer la fiche de remise, qui engage le collaborateur sur le bon usage du matériel et rappelle les règles de sécurité applicables. Remettre enfin la documentation d'accès au support et expliquer comment déclarer un incident. Archiver la fiche signée avec le dossier d'inventaire du poste. Lors d'un remplacement après panne, transférer les données depuis l'ancien poste avant sa réinitialisation, et confirmer avec l'utilisateur que rien ne manque avant d'effacer définitivement l'ancien matériel."
+  },
+  {
+    "id": "KB-PRO-04",
+    "titre": "Prêt de matériel et poste de remplacement",
+    "categorie": "autre",
+    "derniere_maj": "2026-02-06T12:00:00",
+    "contenu": "Un poste de prêt est mis à disposition lorsqu'une panne matérielle immobilise un collaborateur pour plus d'une demi-journée. La demande est faite par le support, qui vérifie la disponibilité dans le stock de prêt avant de s'engager auprès de l'utilisateur. Le prêt est enregistré avec le numéro d'inventaire, la date de remise et la date de restitution prévue. La durée de prêt est limitée à quinze jours ouvrés, renouvelable une fois avec l'accord du responsable du parc. Les données de l'utilisateur ne sont pas transférées sur le poste de prêt : celui-ci donne accès aux ressources partagées et à la messagerie, les documents personnels restant sur l'espace réseau. À la restitution, le poste est réinitialisé intégralement avant d'être remis en stock. Un poste de prêt non restitué dans les délais fait l'objet d'une relance auprès du responsable hiérarchique."
+  }
+]

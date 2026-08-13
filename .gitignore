@@ -1,7 +1,7 @@
 # Environnement
 .venv/
 .env
-
+env/
 # Python
 __pycache__/
 *.pyc
@@ -14,6 +14,3 @@ logs/*.jsonl
 logs/*.log
 logs/*.pid
 chroma_db/
-
-# Résultats d'évaluation (générés par tests/run_eval.py)
-tests/eval_results.json
