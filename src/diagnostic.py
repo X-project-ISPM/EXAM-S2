@@ -1,6 +1,12 @@
-# src/diagnostic.py
-from schemas import DiagnosticInfo
-from llm_client import llm_call  # adapte l'import selon où se trouve ton wrapper SETUP-4
+"""Diagnostic du ticket (§3.2 du sujet, DIAG-1/DIAG-2/DIAG-3).
+
+Complète la classification : extrait les informations déjà présentes dans le
+ticket et identifie les manques avant de proposer une solution (scénario 3 —
+demande incomplète).
+"""
+
+from src.llm_client import llm_call
+from src.schemas import DiagnosticInfo
 
 PROMPT_DIAGNOSTIC = """Extrait les informations disponibles dans ce ticket parmi :
 utilisateur, equipement, application, symptomes, moment_apparition, impact,
@@ -11,11 +17,14 @@ du texte ET nécessaires pour permettre un diagnostic fiable pour ce type de pro
 (ex. pour un problème réseau, l'equipement et le moment_apparition sont importants ;
 pour un mot de passe oublié, ils le sont moins)."""
 
-def extraire_diagnostic(description: str) -> DiagnosticInfo:
-    return llm_call(PROMPT_DIAGNOSTIC, description, response_schema=DiagnosticInfo)
 
-# src/diagnostic.py
-# src/diagnostic.py
+def extraire_diagnostic(description: str) -> DiagnosticInfo:
+    resultat = llm_call(PROMPT_DIAGNOSTIC, description, response_schema=DiagnosticInfo)
+    assert isinstance(resultat, DiagnosticInfo)  # garanti par response_schema
+    return resultat
+
+
+# --- Questions ciblées (DIAG-3) ----------------------------------------------
 
 PRIORITE_CHAMPS = {
     "application": 10,
@@ -27,6 +36,7 @@ PRIORITE_CHAMPS = {
     "utilisateur": 3,
 }
 
+
 def generer_questions(infos_manquantes: list[str]) -> list[str]:
     """
     Transforme une liste de champs manquants en questions ciblées.
@@ -37,11 +47,16 @@ def generer_questions(infos_manquantes: list[str]) -> list[str]:
     questions_types = {
         "equipement": "Quel équipement est concerné (numéro d'inventaire ou description) ?",
         "moment_apparition": "Depuis quand rencontrez-vous ce problème ?",
-        "manipulations_effectuees": "Avez-vous déjà essayé une manipulation pour résoudre ce problème ?",
+        "manipulations_effectuees": (
+            "Avez-vous déjà essayé une manipulation pour résoudre ce problème ?"
+        ),
         "utilisateur": "Pour quel utilisateur ou compte rencontrez-vous ce problème ?",
         "application": "Quelle application ou quel service est concerné ?",
         "impact": "Quel est l'impact sur votre activité (bloquant, gênant, mineur) ?",
-        "symptomes": "Pouvez-vous décrire plus précisément ce qui se passe (message d'erreur, comportement observé) ?",
+        "symptomes": (
+            "Pouvez-vous décrire plus précisément ce qui se passe "
+            "(message d'erreur, comportement observé) ?"
+        ),
     }
 
     champs_tries = sorted(infos_manquantes, key=lambda c: PRIORITE_CHAMPS.get(c, 0), reverse=True)
