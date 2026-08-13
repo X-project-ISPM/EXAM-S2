@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 .env
+env/
 logs/*.jsonl
 chroma_db/
 tests/eval_results.json
