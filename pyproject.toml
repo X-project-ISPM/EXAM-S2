@@ -1,0 +1,41 @@
+[project]
+name = "maintenance-assistant"
+version = "0.1.0"
+description = "Assistant intelligent de support informatique — hackathon ISPM mAIntenance & Assistance"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+    "google-genai",
+    "chromadb",
+    "sentence-transformers",
+    "streamlit",
+    "requests",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "httpx", "ruff"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Les tests touchant le réseau (quota Gemini limité) sont désactivés par
+# défaut : `pytest -m reseau` pour les lancer explicitement.
+markers = ["reseau: test effectuant un appel réel à l'API Gemini"]
+addopts = "-m 'not reseau'"

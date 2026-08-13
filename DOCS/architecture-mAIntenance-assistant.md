@@ -104,7 +104,7 @@ vrai SGBD en 8h. Les outils de consultation (`rechercher_utilisateur`,
 | Composant | Techno | Justification |
 |---|---|---|
 | API | **FastAPI** (Python) | Rapide à monter, typage natif, documentation Swagger auto-générée utile pour présenter les endpoints des outils au jury |
-| LLM | **API Claude ou GPT** (function calling natif) | Aucun entraînement nécessaire ; le function calling couvre nativement classification, agent et sorties structurées |
+| LLM | **Google AI Studio (Gemini API)**, modèle `gemini-3.5-flash-lite` par défaut | Aucun entraînement nécessaire ; sortie JSON structurée native (`response_format` + schéma Pydantic). Flash-Lite retenu pour son quota Free Tier — le plus généreux de la gamme Gemini, nécessaire car le pipeline fait plusieurs appels LLM par ticket (classification, diagnostic, RAG, garde-fous) ; quota exact à revérifier sur [aistudio.google.com/rate-limit](https://aistudio.google.com/rate-limit), spécifique au compte/région |
 | Sorties structurées | **Pydantic** | Valide automatiquement le schéma imposé par le sujet |
 | Classification | **Prompting few-shot** | Zéro entraînement, résultats corrects en quelques heures, facilement justifiable dans le rapport |
 
