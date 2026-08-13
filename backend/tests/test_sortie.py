@@ -6,7 +6,6 @@ vérifie la mécanique (nombre d'essais, transmission de l'erreur au 2e essai,
 """
 
 import pytest
-
 from src.llm_client import LLMError, QuotaDepasseError, SchemaNonConforme
 from src.schemas import TicketDecision
 from src.sortie import generer_avec_retry, reponse_erreur_controlee
