@@ -7,6 +7,7 @@ que découvert pendant la démo.
 
 import pytest
 from pydantic import ValidationError
+
 from src.schemas import Classification, DiagnosticInfo, TicketDecision, TicketReponse
 
 

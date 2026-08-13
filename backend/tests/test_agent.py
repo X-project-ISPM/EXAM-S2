@@ -7,6 +7,7 @@ blocage des actions sensibles, limite d'itérations — sans consommer de quota.
 
 import pytest
 from google.genai import types
+
 from src.agent import (
     charger_action_en_attente,
     executer_action_approuvee,

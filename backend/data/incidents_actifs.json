@@ -1,0 +1,16 @@
+[
+  {
+    "id": "INC-2026-014",
+    "categorie": "reseau",
+    "service_affecte": "production",
+    "depuis": "2026-08-13T07:45:00",
+    "tickets_lies": ["TK-HIST-021", "TK-HIST-022"]
+  },
+  {
+    "id": "INC-2026-015",
+    "categorie": "imprimantes",
+    "service_affecte": "impression",
+    "depuis": "2026-08-13T08:10:00",
+    "tickets_lies": []
+  }
+]

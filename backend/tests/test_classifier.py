@@ -5,6 +5,7 @@ c'est elle qui doit rester stable même quand le modèle varie.
 """
 
 import pytest
+
 from src.classifier import (
     EQUIPES_PAR_CATEGORIE,
     classify_ticket,

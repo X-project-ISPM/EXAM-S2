@@ -1,0 +1,154 @@
+[
+  {
+    "id": "TK-HIST-001",
+    "description": "Mot de passe oublié, impossible de me connecter à ma session.",
+    "categorie": "comptes_authentification",
+    "priorite": "haute",
+    "resolution": "Réinitialisation effectuée après vérification d'identité (KB-AUTH-01).",
+    "duree_resolution_min": 12
+  },
+  {
+    "id": "TK-HIST-002",
+    "description": "Compte verrouillé après plusieurs tentatives de connexion échouées.",
+    "categorie": "comptes_authentification",
+    "priorite": "haute",
+    "resolution": "Compte déverrouillé (KB-AUTH-02).",
+    "duree_resolution_min": 8
+  },
+  {
+    "id": "TK-HIST-003",
+    "description": "mot de pass expire la semaine prochaine comment faire pour le changer",
+    "categorie": "comptes_authentification",
+    "priorite": "basse",
+    "resolution": "Procédure de changement autonome envoyée à l'utilisateur.",
+    "duree_resolution_min": 5
+  },
+  {
+    "id": "TK-HIST-004",
+    "description": "Plus de connexion réseau sur mon poste depuis ce matin.",
+    "categorie": "reseau",
+    "priorite": "haute",
+    "resolution": "Câble RJ45 défectueux remplacé.",
+    "duree_resolution_min": 25
+  },
+  {
+    "id": "TK-HIST-005",
+    "description": "Le VPN se déconnecte toutes les 10 minutes en télétravail.",
+    "categorie": "reseau",
+    "priorite": "moyenne",
+    "resolution": "Mise à jour du client VPN (KB-NET-07).",
+    "duree_resolution_min": 20
+  },
+  {
+    "id": "TK-HIST-006",
+    "description": "Lenteurs réseau généralisées signalées par plusieurs collègues du service compta.",
+    "categorie": "reseau",
+    "priorite": "moyenne",
+    "resolution": null,
+    "duree_resolution_min": null
+  },
+  {
+    "id": "TK-HIST-021",
+    "description": "Impossible de joindre le serveur de production, toute l'équipe production est bloquée.",
+    "categorie": "reseau",
+    "priorite": "critique",
+    "resolution": null,
+    "duree_resolution_min": null
+  },
+  {
+    "id": "TK-HIST-022",
+    "description": "Les applications métier ne répondent plus, ça vient probablement du serveur de prod.",
+    "categorie": "reseau",
+    "priorite": "critique",
+    "resolution": null,
+    "duree_resolution_min": null
+  },
+  {
+    "id": "TK-HIST-007",
+    "description": "Mon PC portable ne s'allume plus du tout, même branché sur secteur.",
+    "categorie": "materiel",
+    "priorite": "haute",
+    "resolution": "Bloc d'alimentation remplacé.",
+    "duree_resolution_min": 40
+  },
+  {
+    "id": "TK-HIST-008",
+    "description": "Écran qui clignote par intermittence.",
+    "categorie": "materiel",
+    "priorite": "basse",
+    "resolution": "Câble vidéo ressoudé, testé stable 48h.",
+    "duree_resolution_min": 15
+  },
+  {
+    "id": "TK-HIST-009",
+    "description": "Excel se ferme tout seul quand j'ouvre un gros fichier.",
+    "categorie": "logiciels",
+    "priorite": "moyenne",
+    "resolution": "Réinstallation du module de calcul, fichier corrompu isolé.",
+    "duree_resolution_min": 30
+  },
+  {
+    "id": "TK-HIST-010",
+    "description": "L'application de facturation plante à l'export PDF.",
+    "categorie": "logiciels",
+    "priorite": "moyenne",
+    "resolution": null,
+    "duree_resolution_min": null
+  },
+  {
+    "id": "TK-HIST-011",
+    "description": "L'imprimante du 3e étage ne répond plus, voyant rouge allumé.",
+    "categorie": "imprimantes",
+    "priorite": "moyenne",
+    "resolution": "Bourrage papier retiré, voyant éteint (KB-IMP-01).",
+    "duree_resolution_min": 10
+  },
+  {
+    "id": "TK-HIST-012",
+    "description": "Impression impossible depuis ce matin, tout le service RH est concerné.",
+    "categorie": "imprimantes",
+    "priorite": "moyenne",
+    "resolution": null,
+    "duree_resolution_min": null
+  },
+  {
+    "id": "TK-HIST-013",
+    "description": "Je n'ai pas accès au dossier partagé compta, le reste fonctionne normalement.",
+    "categorie": "droits_acces",
+    "priorite": "moyenne",
+    "resolution": "Accès accordé après validation du responsable de service.",
+    "duree_resolution_min": 60
+  },
+  {
+    "id": "TK-HIST-014",
+    "description": "Il me faudrait l'accès à l'application de gestion des congés.",
+    "categorie": "droits_acces",
+    "priorite": "basse",
+    "resolution": "Habilitation créée.",
+    "duree_resolution_min": 45
+  },
+  {
+    "id": "TK-HIST-015",
+    "description": "J'ai reçu un courriel suspect avec une pièce jointe bizarre, je ne l'ai pas ouverte.",
+    "categorie": "cybersecurite",
+    "priorite": "haute",
+    "resolution": "Courriel analysé et bloqué, expéditeur mis en liste noire.",
+    "duree_resolution_min": 35
+  },
+  {
+    "id": "TK-HIST-016",
+    "description": "Mon poste affiche des fenêtres publicitaires qui s'ouvrent toutes seules depuis hier.",
+    "categorie": "cybersecurite",
+    "priorite": "critique",
+    "resolution": "Poste isolé du réseau, analyse antivirus complète, logiciel malveillant supprimé.",
+    "duree_resolution_min": 90
+  },
+  {
+    "id": "TK-HIST-017",
+    "description": "ça marche pas",
+    "categorie": "autre",
+    "priorite": "moyenne",
+    "resolution": "Demande de précisions envoyée à l'utilisateur, ticket resté sans réponse.",
+    "duree_resolution_min": null
+  }
+]
