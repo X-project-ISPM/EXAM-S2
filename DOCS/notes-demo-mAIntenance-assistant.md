@@ -46,6 +46,9 @@ Si le démonstrateur a un souci réseau ou de quota :
 
 - présenter directement les résultats déjà générés dans les traces et l’évaluation ;
 - montrer la sortie JSON du ticket traité ;
-- mettre en avant la sécurité et le fait que l’API a bien refusé un scénario sensible.
+- mettre en avant la sécurité et le fait que l’API a bien refusé un scénario sensible ;
+- si l’instance déployée (Render) semble en panne, `GET /health/diagnostic?test=gemini` /
+  `?test=chromadb` / `?test=data` permet d’identifier en direct le composant fautif (clé
+  Gemini, index ChromaDB, fichier de données) plutôt que de deviner devant le jury.
 
 La démonstration doit rester centrée sur la logique métier, pas sur la technologie de l’interface.

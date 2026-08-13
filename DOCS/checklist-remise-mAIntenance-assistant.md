@@ -1,5 +1,10 @@
 # Checklist de remise — DOC-4
 
+> Cette checklist fait partie des documents indexés dans
+> [`livrables/README.md`](../livrables/README.md), avec le README, le rapport technique,
+> les fichiers de lancement et les notes de démo (aussi les liens vers les instances
+> déployées : Streamlit et Render).
+
 ## 1. 8 livrables attendus
 
 1. README complet avec architecture, choix techniques, limites et instructions de lancement.
@@ -45,7 +50,9 @@ Avant de clôturer la remise, vérifier impérativement :
 
 Il est préférable de lancer un contrôle “pre-flight” de 5 minutes avant la démonstration :
 
-- vérifier la santé de l’API ;
+- vérifier la santé de l’API (`GET /health`) ;
+- en cas de doute (notamment si l’instance a redémarré sur Render), isoler le composant en
+  cause avec `GET /health/diagnostic?test=gemini|chromadb|data` avant de blâmer le pipeline ;
 - tester le scénario 1 et 4 ;
 - vérifier que les logs sont bien écrits ;
 - confirmer qu’une action sensible demande validation humaine.
