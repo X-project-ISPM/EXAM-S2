@@ -401,11 +401,29 @@ sûre (jamais d'erreur nue), simplement moins complète qu'elle pourrait l'être
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| DOC-1 | Rédiger `README.md` (architecture, choix, limites, lancement) | 45 min | Tout le reste (en fin de journée) |
-| DOC-2 | Rédiger le rapport technique synthétique | 45 min | EVAL-4 |
-| DOC-3 | Écrire `run.sh` (fichier de lancement) | 15 min | ORCH-4, FE-1 |
-| DOC-4 | Vérifier la checklist de remise complète (8 livrables, 4 scénarios, 3 points de contrôle) | 20 min | Tout |
-| DOC-5 | Préparer/répéter la démo (ordre des scénarios, discours) | 30 min | ORCH-5, FE-8 |
+| ~~DOC-1~~ ✅ | Rédiger `README.md` (architecture, choix, limites, lancement) | 45 min | Tout le reste (en fin de journée) |
+| ~~DOC-2~~ ✅ | Rédiger le rapport technique synthétique | 45 min | EVAL-4 |
+| ~~DOC-3~~ ✅ | Écrire `run.sh` (fichier de lancement) | 15 min | ORCH-4, FE-1 |
+| ~~DOC-4~~ ✅ | Vérifier la checklist de remise complète (8 livrables, 4 scénarios, 3 points de contrôle) | 20 min | Tout |
+| ~~DOC-5~~ ✅ | Préparer/répéter la démo (ordre des scénarios, discours) | 30 min | ORCH-5, FE-8 |
+
+**Résultats mesurés** :
+- `README.md` documente l’architecture réelle du pipeline, la structure backend/, les choix techniques, les limites connues et les commandes de lancement.
+- `DOCS/rapport-technique.md` couvre les 6 points exigés par le sujet (§9) : approche, classification, RAG, agent/outils, évaluation, sécurité/limites.
+- La checklist de remise répertorie bien les 8 livrables, 4 scénarios obligatoires et 3 points de contrôle avant la remise finale.
+- Les notes de démo fixent l’ordre des scénarios et le discours de présentation du système.
+
+**Revue de code — 4 défauts corrigés :**
+1. *README non aligné sur le code réel* : la documentation a été rapprochée de la structure finale `backend/src/`, des endpoints, et du lancement effectif.
+2. *Rapport trop générique* : le document a été rendu plus factuel, avec résultats mesurés et liens explicites vers les modules du projet.
+3. *Checklist incomplète* : la version finale explicite les 8 livrables, les 4 scénarios obligatoires et les 3 points de contrôle à vérifier juste avant la remise.
+4. *Démo insuffisamment préparée* : les notes ajoutent un ordre de passage crédible et un discours de démonstration cohérent avec les cas métier attendus.
+
+**Décisions prises pendant la rédaction** :
+- Garder une architecture simple et justifiable : FastAPI + Streamlit + ChromaDB + Gemini, avec un orchestrateur Python clair et une sortie structurée Pydantic.
+- Préserver un message de démonstration centré sur la logique métier, sans sur-investir dans le style du frontend.
+- Documenter explicitement les limites et les résultats mesurés, plutôt que de présenter un prototype comme un système “parfait”.
+- Réutiliser les fichiers de lancement et les traces observées comme éléments de preuve pendant la démonstration et la remise.
 
 ---
 

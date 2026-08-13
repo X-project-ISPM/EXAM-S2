@@ -30,6 +30,10 @@ packages = ["src"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Sans ce réglage, ruff ne reconnaît plus `src` comme premier-parti depuis la
+# restructuration `backend/` : il fusionne son groupe d'imports avec les
+# bibliothèques tierces, et `ruff check` échoue sur tous les fichiers de test.
+src = ["backend"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

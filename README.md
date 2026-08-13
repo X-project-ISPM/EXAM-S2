@@ -3,10 +3,10 @@
 Assistant intelligent de support informatique : prend en charge un ticket depuis sa
 soumission jusqu'à sa résolution ou son escalade. Hackathon ISPM — AI Engineering & ML.
 
-> **État actuel** : fondations + **classification** (évaluée) + **agent avec les
-> 8 outils** (validation humaine incluse) opérationnels. Le pipeline complet de
-> l'API — diagnostic, RAG, orchestration — est en cours de branchement.
-> Voir [le backlog](DOCS/backlog-mAIntenance-assistant.md).
+> **État actuel** : pipeline complet opérationnel — classification, diagnostic, RAG,
+> agent avec outils, garde-fous, sortie structurée, observabilité et orchestrateur sont
+> tous branchés et testés. Détail de l'avancement, des mesures et des décisions dans
+> [le backlog](DOCS/backlog-mAIntenance-assistant.md).
 
 ## Démarrage rapide
 
@@ -27,56 +27,75 @@ versionné ; seul `.env.example` l'est, avec des valeurs vides.
 ## Architecture
 
 ```
-Interface (Streamlit)
+Interface (Streamlit, frontend/app.py)
         │
         ▼
-Orchestrateur (FastAPI)
+Orchestrateur (FastAPI, backend/src/api.py + orchestrator.py)
         │
-   ┌────┴────┐
-   ▼         ▼
-Base de    Agent + outils
-connais-   (function calling,
-sances     boucle bornée)
-(RAG)         │
-   └────┬────┘
-        ▼
-Sortie structurée (JSON validé par Pydantic)
+        ├─► Garde-fous en entrée (injection, escalade immédiate)
         │
-        ▼
-Ticket : résolution / demande d'info / escalade
+        ├─► Classification (catégorie → priorité → équipe, routage déterministe)
+        │
+        ├─► Diagnostic (informations extraites, manques calculés en code)
+        │
+        ├─► RAG (base de connaissances, recherche + génération citée)
+        │
+        ├─► Agent (function calling, 8 outils, boucle bornée, validation humaine)
+        │
+        └─► Sortie structurée (JSON validé par Pydantic — `TicketDecision`)
+                │
+                ▼
+        Ticket : résolution / demande d'info / escalade
 ```
 
-Deux préoccupations transverses interceptent chaque étape : **observabilité** (chaque
-entrée/sortie, appel d'outil et latence est tracé) et **garde-fous** (détection
-d'injection en entrée, validation humaine sur les actions sensibles).
+Deux préoccupations transverses interceptent chaque étape : **observabilité**
+(`backend/src/observability.py` — entrées/sorties, appels d'outils, appels LLM bruts,
+latence, coût estimé, tous en JSONL) et **garde-fous** (`backend/src/guardrails.py` —
+détection d'injection à deux couches, validation humaine sur les actions sensibles,
+masquage des données sensibles avant tout log).
 
 Le détail complet — prompts, modèles de données, stratégie d'évaluation — est dans
-[DOCS/architecture-mAIntenance-assistant.md](DOCS/architecture-mAIntenance-assistant.md).
+[DOCS/architecture-mAIntenance-assistant.md](DOCS/architecture-mAIntenance-assistant.md),
+et le rapport technique synthétique (approche, RAG, outils, évaluation, sécurité,
+limites) dans [DOCS/rapport-technique.md](DOCS/rapport-technique.md).
 
 ## Structure du code
 
+Le code Python vit sous `backend/` (package `src`, installé en editable) ; l'interface
+Streamlit reste à la racine.
+
 | Chemin | Rôle |
 |---|---|
-| [src/config.py](src/config.py) | Configuration centralisée (modèle, seuils, chemins) |
-| [src/schemas.py](src/schemas.py) | Contrat de sortie : `TicketDecision`, `TicketReponse`… |
-| [src/models.py](src/models.py) | Données métier (utilisateurs, équipements, KB) + chargement |
-| [src/llm_client.py](src/llm_client.py) | Point d'appel unique vers Gemini, avec reprise sur quota |
-| [src/classifier.py](src/classifier.py) | Classification catégorie / priorité + routage équipe |
-| [src/rag.py](src/rag.py) | Découpage, index Chroma, recherche et génération citée |
-| [src/api.py](src/api.py) | Endpoints FastAPI |
-| [frontend/app.py](frontend/app.py) | Interface de démonstration Streamlit |
-| [tests/](tests/) | Tests + jeux de données d'évaluation |
-| `logs/` | Traces d'observabilité (JSONL, générées à l'exécution) |
+| [backend/src/config.py](backend/src/config.py) | Configuration centralisée (modèle, seuils, chemins) |
+| [backend/src/schemas.py](backend/src/schemas.py) | Contrats Pydantic : `TicketDecision`, `Classification`, `ValidationInput`… |
+| [backend/src/models.py](backend/src/models.py) | Données métier (utilisateurs, équipements, KB…) + chargement JSON |
+| [backend/src/llm_client.py](backend/src/llm_client.py) | Point d'appel unique vers Gemini (reprise sur quota, timeout, hook OBS-6) |
+| [backend/src/classifier.py](backend/src/classifier.py) | Classification catégorie / priorité + routage équipe déterministe |
+| [backend/src/diagnostic.py](backend/src/diagnostic.py) | Extraction d'informations + questions ciblées (scénario 3) |
+| [backend/src/rag.py](backend/src/rag.py) | Découpage, index Chroma, recherche et génération citée |
+| [backend/src/agent.py](backend/src/agent.py) | Boucle agent (function calling), validation humaine des actions sensibles |
+| [backend/src/tools.py](backend/src/tools.py) | Les 8 outils du sujet (consultation + action) et leur exécution encadrée |
+| [backend/src/guardrails.py](backend/src/guardrails.py) | Garde-fous anti-injection (2 couches) et masquage des données sensibles |
+| [backend/src/sortie.py](backend/src/sortie.py) | Retry sur sortie non conforme, réponse d'erreur toujours contrôlée |
+| [backend/src/observability.py](backend/src/observability.py) | Traces, appels d'outils, appels LLM bruts, coût estimé (JSONL) |
+| [backend/src/orchestrator.py](backend/src/orchestrator.py) | Enchaîne les étapes, applique les règles métier, gère les dégradations |
+| [backend/src/api.py](backend/src/api.py) | Endpoints FastAPI (`/tickets/traiter`, `/tickets/valider`, `/observabilite/traces`, `/health`) |
+| [frontend/app.py](frontend/app.py) | Interface de démonstration Streamlit (chat + validation humaine + observabilité) |
+| [backend/tests/](backend/tests/) | Tests (259) + jeux de données et scripts d'évaluation |
+| `backend/data/` | Données métier fournies (JSON) |
+| `backend/logs/` | Traces d'observabilité (JSONL, générées à l'exécution, non versionnées) |
+| `backend/chroma_db/` | Index vectoriel persistant de la base de connaissances |
 
 ## Choix techniques
 
 | Choix | Justification |
 |---|---|
-| **Google AI Studio / Gemini**, `gemini-3.5-flash-lite` | Aucun entraînement requis. Flash-Lite pour son débit : le pipeline fait plusieurs appels LLM par ticket, le débit prime sur la profondeur de raisonnement. Quota réel à vérifier sur [aistudio.google.com/rate-limit](https://aistudio.google.com/rate-limit) — il dépend du compte et de la région. |
+| **Google AI Studio / Gemini**, `gemini-3.5-flash-lite` | Aucun entraînement requis. Flash-Lite pour son débit : le pipeline fait 5 à 8 appels LLM par ticket, le débit prime sur la profondeur de raisonnement. Quota réel à vérifier sur [aistudio.google.com/rate-limit](https://aistudio.google.com/rate-limit) — il dépend du compte et de la région. |
 | **Sortie structurée native** (`response_schema`) | Le modèle est contraint côté serveur et rend une instance Pydantic déjà validée, plutôt qu'un JSON à parser puis re-valider. |
 | **FastAPI + Pydantic** | Le schéma imposé par le sujet est validé automatiquement, et `/docs` expose le contrat sans travail supplémentaire. |
 | **Streamlit** | Chat, JSON structuré et tableau de bord d'observabilité dans une seule techno, sans build frontend. |
-| **Un seul process, pas de framework agent** | Sur 8h, la complexité réseau et le débogage d'un framework lourd coûteraient plus qu'ils n'apportent. |
+| **Un seul process, pas de framework agent** | Sur 8h, la complexité réseau et le débogage d'un framework lourd coûteraient plus qu'ils n'apportent. Le pipeline est entièrement synchrone (endpoints FastAPI en `def`, exécutés dans le threadpool) — `/health` reste réactif pendant qu'un ticket se traite. |
+| **Le code contresigne la décision de l'agent** | Catégorie et équipe reviennent toujours au routage déterministe (`classifier.router_vers_equipe`), la priorité ne peut qu'être relevée par l'agent, les sources citées sont recoupées avec les fragments réellement fournis, et les questions posées à l'utilisateur reprennent celles calculées par `diagnostic.py` — jamais une invention du modèle. |
 
 `trace_id` est délibérément **hors** de `TicketDecision` : c'est une métadonnée de
 routage (pour `/tickets/valider` et l'observabilité), pas une donnée métier. Il vit
@@ -86,10 +105,10 @@ au schéma du §5.3 du sujet.
 ## Tests et évaluation
 
 ```bash
-.venv/Scripts/python -m pytest            # tests hors-ligne (34)
-.venv/Scripts/python -m pytest -m reseau  # appels réels à Gemini (consomme du quota)
-.venv/Scripts/python -m tests.eval        # évaluation de la classification
-.venv/Scripts/python -m ruff check .      # lint
+.venv/Scripts/python -m pytest                 # 246 tests hors réseau (par défaut)
+.venv/Scripts/python -m pytest -m reseau        # 13 tests réseau (appels réels à Gemini)
+.venv/Scripts/python -m backend.tests.eval      # évaluation classification + RAG → eval_results.json
+.venv/Scripts/python -m ruff check .            # lint
 ```
 
 Les tests réseau sont exclus par défaut pour ne pas épuiser le quota Free Tier à chaque
@@ -110,94 +129,80 @@ Le prompt initial plafonnait à 80 % sur la priorité : les exemples few-shot an
 modèle sur `basse` pour tout ce qui touchait aux mots de passe, y compris quand
 l'utilisateur était totalement bloqué. Expliciter « ne pas se connecter = bloqué =
 haute » et distinguer l'incident de sécurité *en cours* du simple signalement a corrigé
-trois cas sur quatre.
-
-Le passage de 90 % à 95 % constaté ensuite ne porte que sur un ticket, précisément celui
-dont l'instabilité est mesurée plus bas : **il est dans le bruit** et ne doit pas être
-attribué aux correctifs. Seul l'écart 80 % → 90 %, qui porte sur trois tickets aux
-causes identifiées, est significatif.
-
-Le seul échec restant (EV-12, une habilitation manquante sur une application) oppose
-deux lectures défendables du barème — il est conservé comme tel plutôt que réétiqueté.
+trois cas sur quatre. Le seul échec restant (EV-12, une habilitation manquante sur une
+application) oppose deux lectures défendables du barème — conservé comme tel plutôt que
+réétiqueté.
 
 ### Résultats du RAG
 
-Corpus de 24 articles (26 fragments) et 34 questions, dont 8 volontairement hors du
-corpus. Les questions couvrent les paraphrases, les fautes d'orthographe, les requêtes
-très courtes, les procédures voisines à départager et un article long découpé en
-plusieurs fragments.
+Corpus de 24 articles et 34 questions, dont 8 volontairement hors du corpus :
 
 | Métrique | Résultat |
 |---|---|
-| Rappel@k (bonne source retrouvée) | **96 %** (25/26) |
+| Rappel@k (bonne source retrouvée) | **96,2 %** (25/26) |
 | Précision des citations | **100 %** — aucune source inventée |
 | Détection « pas de source » | **100 %** (8/8 signalées incertaines, aucune source citée) |
 
 L'unique échec de rappel (RQ-22, « un fichier client a été envoyé par erreur à une
 adresse externe » → article sur les fuites de données) n'a aucun recouvrement lexical
-avec sa source : il demande une inférence que l'embedding seul ne fait pas. Point
-important, **il a échoué proprement** — le système a signalé son incertitude et n'a cité
-aucune source, plutôt que de répondre à partir d'un article hors sujet. Une recherche
-hybride (lexicale + vectorielle) est la piste identifiée pour ce type de cas.
+avec sa source et **a échoué proprement** : le système a signalé son incertitude et n'a
+cité aucune source, plutôt que de répondre à partir d'un article hors sujet.
 
-Les huit questions hors corpus incluent trois pièges conçus pour tenter la
-recombinaison : une procédure de restauration inexistante alors que le corpus mentionne
-les sauvegardes, un mot de passe d'imprimante lexicalement très proche de deux articles
-réels, et une durée de conservation qu'on pourrait fabriquer en croisant deux articles
-partiels. Toutes ont été refusées.
-
-Détail complet dans `tests/eval_results.json` (généré).
+Détail complet dans [backend/tests/eval_results.json](backend/tests/eval_results.json).
 
 ### Comment le seuil de pertinence a été fixé
 
-`tests/calibrer_seuil.py` balaie les valeurs candidates sans consommer de quota LLM
-(embeddings locaux uniquement). Trois enseignements ont orienté la conception :
+`backend/tests/calibrer_seuil.py` balaie les valeurs candidates sans consommer de quota
+LLM (embeddings locaux uniquement). Enseignements principaux :
 
 - **ChromaDB indexe en L2 au carré par défaut, pas en cosinus.** La collection est donc
-  créée explicitement en espace cosinus ; sans cela le seuil s'appliquerait à une échelle
-  double et filtrerait silencieusement de travers.
-- **Un seuil serré casse le rappel.** Les bonnes sources se situent entre 0.36 et 0.60 :
-  la valeur de 0.35 initialement envisagée donnait 0 % de rappel.
-- **Aucun seuil ne sépare le hors-corpus.** Sur le corpus élargi, les plages se
-  chevauchent franchement : la meilleure correspondance d'une question hors corpus
-  descend à 0.49, sous plusieurs bonnes réponses. La marge de séparation est donc
-  **négative** (−0.10). Le seuil est volontairement large (0.75, simple filet contre les
-  rapprochements absurdes) et c'est le drapeau `incertain` produit à la génération qui
-  porte la décision — mesuré à 100 % de détection, y compris sur les pièges conçus pour
-  provoquer une recombinaison.
-- **Le modèle multilingue n'apporte rien ici.** Comparé sur le pipeline réel, il obtient
-  le même rappel (92 % avant l'ajustement de `k`) avec une marge de séparation nettement
-  plus mauvaise (−0.38 contre −0.10) et deux fois plus de couches. Le modèle anglais
-  `all-MiniLM-L6-v2` est conservé sur cette base, malgré un corpus francophone.
-- **`k` a été mesuré, pas supposé** : le rappel passe de 92 % (k=4 ou 6) à 96 % (k=8) et
-  stagne ensuite. La détection hors-corpus reste à 100 % malgré les passages
-  supplémentaires.
+  créée explicitement en espace cosinus.
+- **Un seuil serré casse le rappel** : 0.35 (valeur initialement envisagée) donnait 0 %
+  de rappel, les bonnes sources se situant entre 0.36 et 0.60.
+- **Aucun seuil ne sépare le hors-corpus** sur le corpus élargi (marge de séparation
+  négative, −0.10). Le seuil (0.75) reste un simple filet ; c'est le drapeau
+  `incertain` produit à la génération qui porte la décision — 100 % de détection, y
+  compris sur des pièges conçus pour provoquer une recombinaison de sources.
+- **`k` a été mesuré, pas supposé** : le rappel passe de 92 % (k=4/6) à 96 % (k=8) et
+  stagne ensuite.
 
 Deux garde-fous indépendants protègent contre la « procédure inexistante » (§6) :
-le modèle déclare lui-même son incertitude, et un contrôle déterministe retire toute
-source citée qui ne figurait pas dans les passages fournis.
+le modèle déclare lui-même son incertitude, et un contrôle déterministe (dans
+`orchestrator.py` et `rag.py`) retire toute source citée qui ne figurait pas dans les
+passages fournis.
+
+## Sécurité et garde-fous
+
+Deux couches en entrée (`check_injection()`) : mots-clés (précision) puis vérification
+LLM (rappel), avec masquage systématique des données sensibles avant tout log ou
+réponse dégradée. `escalade_immediate()` court-circuite tout le pipeline dès qu'une
+tentative de manipulation est détectée — aucune classification, aucun outil, aucune
+procédure générée. Détail des 3 attaques reformulées testées et des décisions prises
+dans le [backlog](DOCS/backlog-mAIntenance-assistant.md#%EF%B8%8F-sécurité-et-garde-fous)
+et le [rapport technique](DOCS/rapport-technique.md).
 
 ## Limites connues
 
 - **Le modèle n'est pas parfaitement déterministe**, même à `temperature=0` : 4 appels
   identiques sur un ticket frontière ont donné 2 `basse` et 2 `moyenne`. La catégorie
-  est restée stable sur les 4. Les chiffres de priorité portent donc une incertitude de
-  l'ordre d'un ticket sur 20.
-- **Quota Free Tier à 15 requêtes/minute** (constaté sur `gemini-3.5-flash-lite`). Les
-  appels sont lissés en amont (`llm_requetes_par_minute`) et une reprise absorbe les
-  dépassements résiduels, mais cela impose un plancher d'environ 4 s par appel LLM :
-  une démo enchaînant les tickets rapidement restera perceptiblement lente.
-- Le jeu d'évaluation est **rédigé à la main** : il reflète notre compréhension du
-  barème, pas les données réelles du hackathon. Les priorités attendues comportent des
-  cas légitimement discutables (EV-12 en est un).
-- **Le corpus de `data/kb.json` est un corpus d'amorçage rédigé par nos soins**, destiné
-  à être remplacé par celui fourni le jour du hackathon. Les 100 % du RAG sont donc
-  obtenus sur un corpus et des questions écrits par la même équipe : ils valident la
-  chaîne technique, pas la difficulté réelle. Le seuil est à recalibrer
-  (`python -m tests.calibrer_seuil`) dès le corpus réel disponible.
-- Diagnostic, RAG et agent ne sont pas branchés : la décision retournée par l'API reste
-  un stub.
-- Les données du hackathon ne sont pas encore dans `data/` ; le chargeur tolère leur
-  absence pour ne pas bloquer le démarrage, mais les noms de fichiers attendus
-  ([src/models.py](src/models.py)) devront être alignés sur ceux réellement fournis, de
-  même que le vocabulaire d'équipes (`EQUIPES_PAR_CATEGORIE`).
+  est restée stable sur les 4.
+- **Quota Free Tier à ~15 requêtes/minute** (constaté sur `gemini-3.5-flash-lite`). Les
+  appels sont lissés en amont et une reprise absorbe les dépassements résiduels, mais le
+  délai de reprise imposé par l'API peut atteindre ~1 minute par tentative : un ticket
+  peut exceptionnellement prendre plusieurs minutes si le quota est déjà tendu (vécu
+  pendant le développement). Le budget de temps global de l'orchestrateur (120 s) ne
+  protège pas la classification elle-même, seule étape bloquante du pipeline.
+- **`generer_avec_retry()` (régénération sur sortie non conforme) n'est pas encore
+  appelée par les sites d'appel réels** (classification, diagnostic, RAG, agent) : en
+  pratique son déclencheur est rare, car `response_schema` contraint déjà le modèle côté
+  serveur Gemini. Une sortie non conforme dégrade proprement en escalade
+  (`validation_humaine_requise: true`) sans tenter cette régénération.
+- **Le corpus de `backend/data/kb.json` est un corpus d'amorçage rédigé par nos soins**,
+  destiné à être remplacé par celui fourni le jour du hackathon. Les résultats du RAG
+  valident la chaîne technique, pas la difficulté du corpus réel.
+- **Les données utilisateurs/équipements/services/incidents du hackathon ne sont pas
+  encore dans `backend/data/`** (seul `kb.json` y est) : les outils de consultation
+  répondent donc « aucun résultat » en l'état. Le chargeur (`models.py`) tolère les
+  fichiers absents pour ne pas bloquer le démarrage ; les noms de fichiers attendus
+  devront être alignés sur ceux réellement fournis, de même que le vocabulaire d'équipes
+  (`EQUIPES_PAR_CATEGORIE` dans `classifier.py`).
