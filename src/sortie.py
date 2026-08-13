@@ -18,6 +18,7 @@ un schéma défini ») :
 from pydantic import BaseModel, ValidationError
 
 from src.config import config
+from src.guardrails import masquer_donnees_sensibles
 from src.schemas import TicketDecision
 
 
@@ -60,15 +61,25 @@ def reponse_erreur_controlee(description: str, message_erreur: str) -> TicketDec
     Retourne une escalade avec validation humaine requise, confiance nulle et
     le motif technique dans le diagnostic — l'utilisateur sait que le système
     n'a pas pu traiter son ticket, et un humain le reprend.
+
+    `description` et `message_erreur` sont masqués (SEC-5) avant d'être
+    intégrés à la décision : cette fonction est le chemin de repli d'un échec
+    LLM, et un message d'erreur peut recopier un extrait brut de la réponse du
+    modèle — donc potentiellement du texte du ticket lui-même, secrets
+    compris. Sans ce masquage, une décision *dégradée* fuiterait des données
+    que le pipeline nominal protège déjà.
     """
     return TicketDecision(
-        resume=(description or "Ticket non traité")[:200],
+        resume=masquer_donnees_sensibles(description or "Ticket non traité")[:200],
         categorie="autre",
         priorite="haute",
         equipe="support_niveau_1",
         confiance=0.0,
         informations_manquantes=[],
-        diagnostic=f"Erreur technique, ticket transmis à un opérateur : {message_erreur}",
+        diagnostic=(
+            "Erreur technique, ticket transmis à un opérateur : "
+            f"{masquer_donnees_sensibles(message_erreur)}"
+        ),
         etapes_resolution=[],
         sources=[],
         outils_utilises=[],

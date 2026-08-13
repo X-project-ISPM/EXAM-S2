@@ -110,6 +110,19 @@ def test_reponse_erreur_controlee_tronque_la_description():
     assert len(decision.resume) <= 200
 
 
+def test_reponse_erreur_controlee_masque_les_secrets():
+    """SEC-5 : un message d'erreur peut recopier un extrait brut de réponse
+    LLM — potentiellement le ticket lui-même, secrets compris. Ni la
+    description ni le message d'erreur ne doivent fuiter tels quels."""
+    decision = reponse_erreur_controlee(
+        "mon mot de passe : Ete2024! ne fonctionne plus",
+        "Réponse brute : mot de passe : Ete2024!",
+    )
+    assert "Ete2024!" not in decision.resume
+    assert "Ete2024!" not in decision.diagnostic
+    assert "***" in decision.resume
+
+
 def test_validation_error_est_bien_attrapee_par_le_retry():
     """Le retry ne doit réagir qu'aux ValidationError : les autres exceptions
     (ex. réseau) remontent immédiatement, ce n'est pas un problème de schéma."""

@@ -54,7 +54,13 @@ def _get_client() -> genai.Client:
             "GEMINI_API_KEY absente. Copier .env.example vers .env et y coller "
             "la clé obtenue sur https://aistudio.google.com/apikey"
         )
-    return genai.Client(api_key=config.gemini_api_key)
+    return genai.Client(
+        api_key=config.gemini_api_key,
+        # Borne haute sur chaque appel (ORCH-3) : sans elle, une API qui ne
+        # répond pas fige la requête FastAPI et la réponse dégradée ne part
+        # jamais. Le SDK attend des millisecondes.
+        http_options=types.HttpOptions(timeout=int(config.llm_timeout_s * 1000)),
+    )
 
 
 _dernier_appel: float = 0.0

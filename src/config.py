@@ -28,6 +28,12 @@ class Config(BaseSettings):
     # plusieurs appels par ticket, la reprise sur quota n'est pas optionnelle.
     llm_max_tentatives: int = 4
     llm_attente_quota: float = 6.0  # secondes, si l'API n'indique pas de délai
+    # Timeout d'un appel HTTP au modèle (ORCH-3). Sans borne explicite, une API
+    # qui ne répond pas fige la requête FastAPI et le frontend attend
+    # indéfiniment : la réponse dégradée ne partirait jamais. Généreux par
+    # rapport aux 1-5 s observées sur flash-lite, pour ne pas couper un appel
+    # simplement lent.
+    llm_timeout_s: float = 30.0
     # Lissage proactif : espacer les appels coûte moins cher que d'encaisser
     # une 429, dont le délai de reprise imposé par l'API dépasse la minute.
     # 0 désactive le lissage.
@@ -69,6 +75,17 @@ class Config(BaseSettings):
 
     # --- Agent ---
     agent_max_iterations: int = 5  # §5.2 du sujet : contrôle du nombre d'actions
+
+    # --- Orchestrateur (ORCH-1 / ORCH-3) ---
+    # Budget de temps total d'un ticket. Le lissage de débit espace déjà les
+    # appels de ~4,3 s (14 req/min) et le pipeline en émet 5 à 8 : un ticket
+    # normal tient en 30-60 s. Au-delà du budget, les étapes optionnelles
+    # (diagnostic, RAG, agent) sont sautées et la décision est construite avec
+    # ce qui a déjà été obtenu, plutôt que de laisser l'utilisateur attendre.
+    orchestrateur_budget_s: float = 120.0
+    # En dessous de ce seuil, la classification est trop incertaine pour agir
+    # sans relecture humaine (§6 du sujet : validation avant action).
+    orchestrateur_seuil_confiance: float = 0.5
 
     # --- Chemins ---
     dossier_data: Path = RACINE / "data"
