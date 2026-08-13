@@ -3,9 +3,10 @@
 Assistant intelligent de support informatique : prend en charge un ticket depuis sa
 soumission jusqu'à sa résolution ou son escalade. Hackathon ISPM — AI Engineering & ML.
 
-> **État actuel** : fondations + **classification opérationnelle et évaluée**.
-> Diagnostic, RAG et agent restent à brancher — `POST /tickets/traiter` renvoie
-> encore une décision factice. Voir [le backlog](DOCS/backlog-mAIntenance-assistant.md).
+> **État actuel** : fondations + **classification** (évaluée) + **agent avec les
+> 8 outils** (validation humaine incluse) opérationnels. Le pipeline complet de
+> l'API — diagnostic, RAG, orchestration — est en cours de branchement.
+> Voir [le backlog](DOCS/backlog-mAIntenance-assistant.md).
 
 ## Démarrage rapide
 
@@ -61,6 +62,8 @@ Le détail complet — prompts, modèles de données, stratégie d'évaluation �
 | [src/models.py](src/models.py) | Données métier (utilisateurs, équipements, KB) + chargement |
 | [src/llm_client.py](src/llm_client.py) | Point d'appel unique vers Gemini, avec reprise sur quota |
 | [src/classifier.py](src/classifier.py) | Classification catégorie / priorité + routage équipe |
+| [src/tools.py](src/tools.py) | Spécification et implémentation des 8 outils + exécution validée |
+| [src/agent.py](src/agent.py) | Boucle agent (function calling, limite d'itérations, validation humaine) |
 | [src/api.py](src/api.py) | Endpoints FastAPI |
 | [frontend/app.py](frontend/app.py) | Interface de démonstration Streamlit |
 | [tests/](tests/) | Tests + jeux de données d'évaluation |
@@ -120,6 +123,28 @@ deux lectures défendables du barème — il est conservé comme tel plutôt que
 
 Détail complet dans `tests/eval_results.json` (généré).
 
+### Résultats de Agents + Outils
+
+La boucle agent est testée avec un LLM simulé : ce qu'on vérifie hors-ligne, ce sont
+les mécanismes que le **code contrôle** (le modèle, lui, ne peut pas être évalué sans
+quota). 48 tests couvrent la spécification, l'implémentation des 8 outils et la
+mécanique de la boucle :
+
+| Mécanisme vérifié | Résultat |
+|---|---|
+| Spécification conforme au §3.4 | 8/8 outils aux noms exacts du sujet, 4 consultations + 4 actions |
+| Sensibilité des actions (§6) | `mettre_a_jour_ticket` et `escalader_vers_technicien` bloqués côté code, **0 exécution non approuvée** (vérifié : le registre est intact après une tentative) |
+| Validation des paramètres (§5.2) | appels incomplets ou outils inconnus refusés avant exécution |
+| Erreurs d'appel (§5.2) | toute exception interne (ticket inexistant…) capturée et renvoyée au modèle — jamais d'exception vers l'utilisateur |
+| Contrôle du nombre d'actions (§5.2) | boucle bornée à 5 itérations ; limite atteinte → escalade propre, pas d'erreur nue |
+| Validation humaine (§5.2/§6) | action sensible mise en attente ; exécution possible **uniquement** après approbation (chemin `/tickets/valider`) |
+| Sortie structurée (§5.3) | réponse finale contrainte au schéma `TicketDecision` côté serveur + revalidée Pydantic ; sortie non conforme → erreur typée, dégradée par l'orchestrateur |
+| Couverture | 30 tests outils + 9 tests agent, 1 test réseau (`-m reseau`) pour l'appel réel |
+
+Limite mesurée : la mécanique est validée hors-ligne, mais le choix effectif des outils
+par le modèle ne peut se juger qu'en appel réel — c'est l'objet du test réseau, à
+exécuter une fois la clé configurée, et de la démo.
+
 ## Limites connues
 
 - **Le modèle n'est pas parfaitement déterministe**, même à `temperature=0` : 4 appels
@@ -133,8 +158,10 @@ Détail complet dans `tests/eval_results.json` (généré).
 - Le jeu d'évaluation est **rédigé à la main** : il reflète notre compréhension du
   barème, pas les données réelles du hackathon. Les priorités attendues comportent des
   cas légitimement discutables (EV-12 en est un).
-- Diagnostic, RAG et agent ne sont pas branchés : la décision retournée par l'API reste
-  un stub.
+- L'agent est **testé avec un LLM simulé** (mécanique de boucle, blocage des actions
+  sensibles, limite d'itérations) ; le test réseau réel (`-m reseau`) reste à valider
+  en début de journée.
+- Diagnostic, RAG et orchestration de l'API ne sont pas encore branchés au pipeline.
 - Les données du hackathon ne sont pas encore dans `data/` ; le chargeur tolère leur
   absence pour ne pas bloquer le démarrage, mais les noms de fichiers attendus
   ([src/models.py](src/models.py)) devront être alignés sur ceux réellement fournis, de
