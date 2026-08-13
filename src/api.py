@@ -93,6 +93,13 @@ def valider_action(validation: ValidationInput) -> ValidationReponse:
     )
 
 
+@app.get("/observabilite/traces")
+def observabilite_traces(limite: int = 50) -> list[dict]:
+    """OBS-4 : les dernières traces, les plus récentes en premier — consommé
+    par l'onglet Observabilité du frontend (FE-6)."""
+    return lire_dernieres_traces(limite)
+
+
 @app.get("/health")
 def health():
     """État du service (ORCH-4).

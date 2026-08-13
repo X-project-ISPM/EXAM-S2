@@ -257,12 +257,18 @@ place depuis ORCH-1 (`src/orchestrator.py`).
 
 | ID | Ticket | Estimation | Dépendances |
 |---|---|---|---|
-| OBS-1 | Implémenter `log_trace()` et `log_tool_call()` (écriture JSONL) | 30 min | OUT-1 |
-| OBS-2 | Brancher les logs à chaque étape de l'orchestrateur | 20 min | OBS-1, ORCH-1 |
-| OBS-3 | Implémenter l'estimation de coût (`estimer_cout()`) | 20 min | OBS-1 |
-| OBS-4 | Implémenter l'endpoint `GET /observabilite/traces` | 15 min | OBS-1 |
+| ~~OBS-1~~ ✅ | `log_trace()` et `log_tool_call()` (écriture JSONL), + lecteurs `lire_dernieres_traces()`/`lire_derniers_appels_outils()` | 30 min | OUT-1 |
+| OBS-2 | Brancher les logs à chaque étape de l'orchestrateur | 20 min | OBS-1 ✅, ORCH-1 |
+| ~~OBS-3~~ ✅ | `estimer_cout()` (approximatif, tarifs configurables) | 20 min | OBS-1 |
+| ~~OBS-4~~ ✅ | Endpoint `GET /observabilite/traces` — branché sur le stub SETUP-5 dès maintenant, données réelles pour FE-6 sans attendre ORCH-1 | 15 min | OBS-1 |
 | OBS-5 | Décomposer la latence par étape (classification/RAG/agent) dans chaque trace | 20 min | OBS-2 |
-| OBS-6 **[NOUVEAU]** | Implémenter `log_llm_call()` (écrit dans `logs/llm_calls.jsonl`) et le brancher dans `llm_call()`/`llm_call_with_tools()` — un seul point d'instrumentation pour couvrir les 4 appels LLM du pipeline (classification, diagnostic, RAG, agent). Exigé explicitement au §5.4 du sujet ("prompts et réponses du modèle génératif"), pas couvert par OBS-1 qui ne logue que la décision finale. | 25 min | OBS-1, SETUP-4 |
+| ~~OBS-6~~ ✅ **[NOUVEAU]** | `log_llm_call()` (écrit dans `logs/llm_calls.jsonl`), branché dans `llm_call()`/`llm_call_with_tools()` via un hook (`set_log_llm_call`, même pattern que `tools.set_log_appel` — import direct impossible, cycle via `guardrails.py`) | 25 min | OBS-1 ✅, SETUP-4 |
+
+**Résultats mesurés** : suite complète 204 tests, `ruff` clean. Testé en réel avec un serveur uvicorn (pas juste `TestClient`) : `POST /tickets/traiter` puis `GET /observabilite/traces` retournent bien la trace écrite sur disque, secrets masqués (`Ete2024!` → `***`) dans la description et la décision imbriquée.
+
+**Bug trouvé et corrigé en cours de route (dans `guardrails.py`, hors périmètre OBS)** : `masquer_objet()` masquait `tokens_entree`/`tokens_sortie` (compteurs numériques d'OBS-6) parce que « token » y apparaît en sous-chaîne. Un `\b` autour du motif aurait aussi empêché de masquer des clés composées légitimes comme `user_token` (le soulignement n'est pas une frontière de mot). Fix ciblé : `token(?!s_)` — exclut seulement la forme plurielle suivie d'un underscore, sans affaiblir la détection ailleurs. Tests de régression ajoutés dans `test_guardrails.py`.
+
+**Portée non couverte ici (attend ORCH-1)** : OBS-2 et OBS-5 nécessitent que l'orchestrateur réel existe pour propager `trace_id`/latences par étape jusqu'à `llm_call()`. `log_llm_call()` accepte déjà `etape`/`trace_id` en paramètres optionnels — aucun appelant existant (classification, diagnostic, RAG, agent, garde-fous) n'a besoin d'être modifié quand ORCH-1 les branchera.
 
 ## 🔗 Orchestrateur (intégration backend)
 
