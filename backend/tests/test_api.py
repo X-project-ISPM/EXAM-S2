@@ -11,13 +11,13 @@ appel réel à Gemini via l'orchestrateur — exactement ce que le marqueur
 
 import pytest
 from fastapi.testclient import TestClient
-
-from src import agent, orchestrator
 from src.api import app
 from src.config import config
 from src.models import BaseDeDonnees
 from src.schemas import Classification, DiagnosticInfo, TicketDecision
 from src.tools import creer_ticket, initialiser_donnees
+
+from src import agent, orchestrator
 
 SAIN = {"danger": False, "raison": None, "couche": None, "verification_llm": "ok"}
 
