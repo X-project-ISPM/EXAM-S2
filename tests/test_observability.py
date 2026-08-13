@@ -5,6 +5,8 @@ Chaque test redirige `config.dossier_logs` vers un répertoire temporaire
 la suite de tests.
 """
 
+from types import SimpleNamespace
+
 import pytest
 
 from src.config import config
@@ -25,24 +27,63 @@ def _logs_isoles(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "dossier_logs", tmp_path)
 
 
+def _ticket(description: str) -> SimpleNamespace:
+    return SimpleNamespace(description=description)
+
+
+CLASSIFICATION = SimpleNamespace(categorie="materiel", priorite="haute", confiance=0.9)
+
+
 # --- Traces (OBS-1, OBS-4) ---------------------------------------------------
+# Signature imposée par orchestrator.set_log_trace() (OBS-2) :
+# (trace_id, ticket, classification, contexte, decision, latence_ms).
 
 
 def test_trace_ecrite_puis_relue():
-    log_trace("t1", "mon écran est noir", {"action": "resolution"}, 123.456)
+    log_trace(
+        "t1", _ticket("mon écran est noir"), CLASSIFICATION, [],
+        {"action": "resolution"}, 123.456,
+    )
     traces = lire_dernieres_traces()
 
     assert len(traces) == 1
     assert traces[0]["trace_id"] == "t1"
+    assert traces[0]["description"] == "mon écran est noir"
+    assert traces[0]["categorie_classifiee"] == "materiel"
     assert traces[0]["decision"] == {"action": "resolution"}
     assert traces[0]["latence_ms"] == 123.5  # arrondi
     assert "horodatage" in traces[0]
 
 
+def test_trace_avec_decision_pydantic_est_serialisee():
+    """L'orchestrateur passe un vrai TicketDecision, pas un dict déjà aplati :
+    model_dump() doit être appelé automatiquement."""
+    from src.schemas import TicketDecision
+
+    decision = TicketDecision(
+        resume="r", categorie="materiel", priorite="basse", equipe="support_materiel",
+        confiance=0.5, informations_manquantes=[], diagnostic="d", etapes_resolution=[],
+        sources=[], outils_utilises=[], action="resolution", validation_humaine_requise=False,
+    )
+    log_trace("t1", _ticket("x"), None, [], decision, 1.0)
+    assert lire_dernieres_traces()[0]["decision"]["categorie"] == "materiel"
+
+
+def test_trace_sans_ticket_ni_classification():
+    """Les garde-fous peuvent court-circuiter le pipeline avant que
+    classification n'existe : ticket=None/classification=None ne doit pas
+    planter le log."""
+    log_trace("t1", None, None, None, {"action": "escalade"}, 1.0)
+    trace = lire_dernieres_traces()[0]
+    assert trace["description"] is None
+    assert trace["categorie_classifiee"] is None
+    assert trace["nb_documents_contexte"] == 0
+
+
 def test_traces_les_plus_recentes_en_premier():
-    log_trace("t1", "premier", None, 10)
-    log_trace("t2", "second", None, 10)
-    log_trace("t3", "troisieme", None, 10)
+    log_trace("t1", _ticket("premier"), None, [], {}, 10)
+    log_trace("t2", _ticket("second"), None, [], {}, 10)
+    log_trace("t3", _ticket("troisieme"), None, [], {}, 10)
 
     traces = lire_dernieres_traces()
     assert [t["trace_id"] for t in traces] == ["t3", "t2", "t1"]
@@ -50,7 +91,7 @@ def test_traces_les_plus_recentes_en_premier():
 
 def test_limite_respectee():
     for i in range(5):
-        log_trace(f"t{i}", "x", None, 1)
+        log_trace(f"t{i}", _ticket("x"), None, [], {}, 1)
     assert len(lire_dernieres_traces(limite=2)) == 2
 
 
@@ -61,7 +102,7 @@ def test_aucun_fichier_ne_retourne_liste_vide():
 def test_trace_masque_les_donnees_sensibles():
     """SEC-5 : un mot de passe en clair dans la description ne doit jamais
     atterrir tel quel dans traces.jsonl."""
-    log_trace("t1", "mon mot de passe est Ete2024!", None, 1)
+    log_trace("t1", _ticket("mon mot de passe est Ete2024!"), None, [], {}, 1)
     traces = lire_dernieres_traces()
     assert "Ete2024" not in traces[0]["description"]
     assert "***" in traces[0]["description"]

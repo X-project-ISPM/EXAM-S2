@@ -64,22 +64,36 @@ def _lire_dernieres_lignes(fichier: Path, limite: int) -> list[dict[str, Any]]:
 
 def log_trace(
     trace_id: str,
-    description: str,
-    decision: dict[str, Any] | None,
+    ticket: Any,
+    classification: Any | None,
+    contexte: list[dict[str, Any]] | None,
+    decision: Any,
     latence_ms: float,
-    erreur: str | None = None,
 ) -> None:
     """Journalise le traitement complet d'un ticket : une ligne par appel à
-    `POST /tickets/traiter`, décision finale incluse."""
+    `POST /tickets/traiter`, décision finale incluse.
+
+    Signature imposée par `orchestrator.set_log_trace()` (OBS-2) — pas celle,
+    plus simple, d'origine (`description`/`decision: dict`/`erreur`) : cette
+    dernière ne correspondait à aucun appelant réel une fois l'orchestrateur
+    écrit, `ticket`/`classification`/`decision` y sont des objets Pydantic, pas
+    des dicts déjà aplatis. `ticket`/`classification` restent `None`-safe
+    (`getattr`) : l'orchestrateur appelle ce hook même quand les garde-fous ou
+    la classification ont court-circuité le pipeline avant que ces objets
+    n'existent.
+    """
     _ecrire_jsonl(
         config.fichier_traces,
         {
             "horodatage": _horodatage(),
             "trace_id": trace_id,
-            "description": description,
-            "decision": decision,
+            "description": getattr(ticket, "description", None),
+            "categorie_classifiee": getattr(classification, "categorie", None),
+            "priorite_classifiee": getattr(classification, "priorite", None),
+            "confiance_classification": getattr(classification, "confiance", None),
+            "nb_documents_contexte": len(contexte) if contexte else 0,
+            "decision": decision.model_dump() if hasattr(decision, "model_dump") else decision,
             "latence_ms": round(latence_ms, 1),
-            "erreur": erreur,
         },
     )
 
