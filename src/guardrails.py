@@ -64,9 +64,13 @@ MOTS_CLES_INJECTION = [
     r"\b(?:ignore[sz]?|oublie[sz]?|ne\s+t[ei]ens?\s+pas\s+compte|ne\s+tenez\s+pas\s+compte)\b"
     r"[^.\n]{0,30}?\b(?:instructions?|consignes?|r[èe]gles?|ce\s+qui\s+pr[ée]c[èe]de|"
     r"tout\s+ce\s+qu[i'])",
-    # Changement de rôle imposé au modèle.
-    r"\btu\s+es\s+(?:maintenant|d[ée]sormais)\b",
-    r"\bnouveau\s+r[ôo]le\b",
+    # Changement de rôle imposé au modèle. « nouveau rôle » seul est du
+    # vocabulaire métier ordinaire (« un nouveau rôle a été attribué à Mme
+    # Rakoto, ses droits ne suivent pas ») : le motif n'est retenu que quand
+    # le rôle est explicitement celui de l'assistant.
+    r"\b(?:tu\s+es|vous\s+[êe]tes)\s+(?:maintenant|d[ée]sormais)\b",
+    r"\b(?:ton|votre)\s+nouveau\s+r[ôo]le\b",
+    r"\b(?:prends?|prenez|adopte[sz]?|endosse[sz]?)\s+(?:ce|cet|un|le)\s+nouveau\s+r[ôo]le\b",
     # Exfiltration du prompt système.
     r"\b(?:r[ée]v[èe]le[sz]?|affiche[sz]?|montre[sz]?|donne[sz]?|divulgue[sz]?)\b"
     r"[^.\n]{0,30}?\b(?:ton|tes|votre|vos)\s+(?:prompt|instructions?|consignes?)",
@@ -185,9 +189,12 @@ def check_injection(texte: str, avec_llm: bool = True) -> dict:
 
     extrait = _detecter_mots_cles(texte)
     if extrait is not None:
+        # L'extrait est du texte utilisateur brut et finit en trace : masqué
+        # ici, à la source, plutôt qu'à chaque site de log.
+        extrait = masquer_donnees_sensibles(extrait[:_TAILLE_EXTRAIT])
         return {
             "danger": True,
-            "raison": f"Motif d'injection détecté dans le ticket : « {extrait[:_TAILLE_EXTRAIT]} »",
+            "raison": f"Motif d'injection détecté dans le ticket : « {extrait} »",
             "couche": "mots_cles",
             "verification_llm": "court_circuitee",
         }
@@ -246,7 +253,12 @@ def escalade_immediate(description: str, risque: dict) -> TicketDecision:
     décision elle-même : transmettre à un humain est l'issue sûre, il n'y a
     aucune incertitude sur ce point.
     """
-    raison = risque.get("raison") or "contenu signalé comme tentative de manipulation"
+    # La raison cite le ticket — extrait déclencheur côté mots-clés, phrase du
+    # modèle côté LLM : elle passe par le masquage au même titre que la
+    # description, sans quoi le secret ressortirait par le diagnostic.
+    raison = masquer_donnees_sensibles(
+        risque.get("raison") or "contenu signalé comme tentative de manipulation"
+    )
     couche = risque.get("couche") or "garde-fous"
     extrait = masquer_donnees_sensibles(description or "").strip()[:200]
 
@@ -281,17 +293,30 @@ def escalade_immediate(description: str, risque: dict) -> TicketDecision:
 # Un simple `if "mot de passe" in texte` détruirait des logs utiles : « j'ai
 # oublié mon mot de passe » ne contient aucun secret. On n'agit donc que sur le
 # couple étiquette + valeur (« mot de passe : X », « mdp = X », « token est X »).
+#
+# `qualificatif` couvre les formulations réelles où l'étiquette est précisée
+# avant le verbe : « mon mot de passe **Windows** est X », « mot de passe **du
+# compte** : X », « mdp **wifi** = X ». Sans lui, seule la forme nue était
+# masquée — c'est-à-dire la moins fréquente en français.
 _ETIQUETTE_SECRET = re.compile(
     r"(?P<etiquette>\b(?:mots?\s+de\s+passe|mdp|password|passwd|pwd|code\s+pin|"
-    r"jeton|token|api[_\s-]?key|cl[ée]\s+(?:api|secr[èe]te)|secret)\b)"
+    r"jeton|token|api[_\s-]?key|cl[ée]\s+(?:api|secr[èe]te)|secret)\b"
+    # 4 mots : de quoi couvrir « du compte de service », sans laisser la
+    # correspondance traverser une proposition entière.
+    r"(?P<qualificatif>(?:\s+(?!est\b|sont\b)[\w'’@.-]+){0,4}?))"
     r"(?P<liaison>\s*(?:est|sont|:|=|->)\s*)"
-    r"(?P<valeur>\S+)",
+    # Tout le reste de la ligne : c'est le code, pas la regex, qui décide où
+    # s'arrête le secret (voir `_masquer_valeur`). Découper ici sur `\S+`
+    # laissait fuiter « mot de passe : le fameux Soleil#42 ».
+    r"(?P<valeur>[^\n]+)",
     re.IGNORECASE,
 )
 
 # Mots qui suivent couramment « mot de passe est ... » sans être un secret.
 # Sans cette liste, « mon mot de passe est expiré » deviendrait « mot de passe
 # est *** » — un log exact mais devenu inexploitable pour le support.
+# Aucun déterminant ici : « mot de passe : le fameux Soleil#42 » aurait été
+# considéré comme non secret sur la foi du seul « le ».
 _SUITES_NON_SECRETES = {
     "expire", "expiré", "expirée", "expiree", "expirés", "oublié", "oublie",
     "oubliée", "perdu", "perdue", "incorrect", "incorrecte", "invalide",
@@ -299,8 +324,13 @@ _SUITES_NON_SECRETES = {
     "changé", "change", "modifié", "modifie", "réinitialisé", "reinitialise",
     "temporaire", "trop", "toujours", "encore", "vide", "rejeté", "rejete",
     "obligatoire", "demandé", "demande", "correct", "bon", "mauvais",
-    "le", "la", "les", "un", "une", "mon", "ma", "mes", "que", "quoi",
+    "expiré.", "inconnu", "inconnue", "accepté", "accepte",
 }
+
+# Fin du secret : une ponctuation forte suivie d'une espace ou de la fin de
+# ligne. « Soleil.42 » n'est donc pas coupé au point, alors que
+# « Soleil#42, et mon login est jdupont » l'est bien à la virgule.
+_FIN_DE_SECRET = re.compile(r"[,;.](?=\s|$)")
 
 # Adresse de courriel : on garde l'initiale et le domaine (assez pour router
 # un ticket, pas assez pour reconstituer l'identifiant de connexion).
@@ -308,27 +338,48 @@ _EMAIL = re.compile(r"\b([A-Za-z0-9._%+-])[A-Za-z0-9._%+-]*(@[A-Za-z0-9.-]+\.[A-
 
 # Clés de dictionnaire dont la valeur est masquée quelle qu'elle soit : utile
 # pour les paramètres d'outils et les corps de requêtes loggés (OBS-1/OBS-6).
-# `token(?!s_)`/`jeton(?!s_)` : sans cette exception, « tokens_entree » et
-# « tokens_sortie » (compteurs numériques de OBS-6, pas des secrets) étaient
-# masqués eux aussi — « token » y apparaît en sous-chaîne. Pas de `\b` en
-# remplacement : ça laisserait passer un vrai secret sous une clé composée
-# comme « user_token » ou « old_password » (le soulignement n'est pas une
-# frontière de mot pour `\b`).
+# Ancré, et volontairement pas en sous-chaîne : `token` ne doit pas emporter
+# `tokens_entree` / `prompt_tokens`, qui sont précisément les métriques de coût
+# qu'OBS-3 exploite.
 _CLE_SECRETE = re.compile(
-    r"(mot_?de_?passe|mdp|password|passwd|pwd|token(?!s_)|jeton(?!s_)|secret|"
-    r"api[_-]?key|cl[ée]_?api)",
+    r"^(?:[\w-]*[_\-.])?"
+    r"(?:mot_?de_?passe|mdp|password|passwd|pwd|token|jeton|secret|"
+    r"api[_\-]?key|cl[ée]_?api|authorization)"
+    r"(?:[_\-.][\w-]*)?$",
     re.IGNORECASE,
 )
 
 _MASQUE = "***"
 
 
+def _est_une_suite_non_secrete(mot: str) -> bool:
+    return mot.strip(".,;:!?…»\"')").lower() in _SUITES_NON_SECRETES
+
+
 def _masquer_valeur(correspondance: re.Match) -> str:
-    valeur = correspondance.group("valeur")
-    nu = valeur.strip(".,;:!?…»\"')").lower()
-    if nu in _SUITES_NON_SECRETES:
+    """Masque la portion de la ligne qui suit une étiquette de secret.
+
+    Deux garde-fous contre la sur-application : un qualificatif qui décrit un
+    *état* (« mot de passe oublié depuis hier : ... ») et une valeur qui n'en
+    est pas une (« mot de passe est expiré ») laissent le texte intact.
+    """
+    qualificatif = correspondance.group("qualificatif") or ""
+    if any(_est_une_suite_non_secrete(mot) for mot in qualificatif.split()):
         return correspondance.group(0)
-    return f"{correspondance.group('etiquette')}{correspondance.group('liaison')}{_MASQUE}"
+
+    valeur = correspondance.group("valeur")
+    premier_mot = valeur.split(maxsplit=1)[0] if valeur.split() else ""
+    if _est_une_suite_non_secrete(premier_mot):
+        return correspondance.group(0)
+
+    # Le secret court jusqu'à la première ponctuation forte : le reste de la
+    # phrase (« ..., merci d'avance ») est conservé tel quel.
+    fin = _FIN_DE_SECRET.search(valeur)
+    reste = valeur[fin.start():] if fin else ""
+    return (
+        f"{correspondance.group('etiquette')}"
+        f"{correspondance.group('liaison')}{_MASQUE}{reste}"
+    )
 
 
 def masquer_donnees_sensibles(texte: str) -> str:
