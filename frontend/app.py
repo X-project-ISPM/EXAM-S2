@@ -29,8 +29,13 @@ if page == "Chat":
     if st.button("Envoyer") and ticket:
         with st.spinner("Traitement..."):
             try:
+                # Le backend s'autorise un budget de 120s pour un ticket
+                # complet (orchestrateur_budget_s, backend/src/config.py) :
+                # un timeout de 30s ici coupait des requêtes qui auraient
+                # fini par aboutir — confirmé en réel (ReadTimeout à 30s
+                # contre l'instance déployée).
                 r = requests.post(
-                    f"{API}/tickets/traiter", json={"description": ticket}, timeout=30
+                    f"{API}/tickets/traiter", json={"description": ticket}, timeout=150
                 )
                 r.raise_for_status()
                 st.session_state["derniere_reponse"] = r.json()
