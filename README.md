@@ -3,9 +3,10 @@
 Assistant intelligent de support informatique : prend en charge un ticket depuis sa
 soumission jusqu'à sa résolution ou son escalade. Hackathon ISPM — AI Engineering & ML.
 
-> **État actuel** : fondations + **classification opérationnelle et évaluée**.
-> Diagnostic, RAG et agent restent à brancher — `POST /tickets/traiter` renvoie
-> encore une décision factice. Voir [le backlog](DOCS/backlog-mAIntenance-assistant.md).
+> **État actuel** : fondations + **classification** (évaluée) + **agent avec les
+> 8 outils** (validation humaine incluse) opérationnels. Le pipeline complet de
+> l'API — diagnostic, RAG, orchestration — est en cours de branchement.
+> Voir [le backlog](DOCS/backlog-mAIntenance-assistant.md).
 
 ## Démarrage rapide
 
